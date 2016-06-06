@@ -1,0 +1,40 @@
+{
+    "name": "Travoltron/Plaid",
+    "type": "library",
+    "description": "Laravel specific wrapper for Plaid. Bankdata for developers.",
+    "keywords": ["Travoltron", "Plaid", "Laravel", "Laravel5"],
+    "homepage": "https://github.com/Travoltron/Plaid",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Ben Warburton",
+            "email": "ben@travoltron.com"
+        }
+    ],
+    "require": {
+        "illuminate/support": "~5.1",
+        "php" : "~5.5|~7.0",
+        "nesbot/carbon": "~1.18"
+    },
+    "require-dev": {
+        "phpunit/phpunit" : "4.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Travoltron\\Plaid\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Travoltron\\Plaid\\": "tests"
+        }
+    },
+    "scripts": {
+        "test": "phpunit"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0-dev"
+        }
+    }
+}
