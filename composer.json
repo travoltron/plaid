@@ -1,9 +1,9 @@
 {
-    "name": "Travoltron/Plaid",
+    "name": "travoltron/plaid",
     "type": "library",
     "description": "Laravel specific wrapper for Plaid. Bankdata for developers.",
     "keywords": ["Travoltron", "Plaid", "Laravel", "Laravel5"],
-    "homepage": "https://github.com/Travoltron/Plaid",
+    "homepage": "https://github.com/travoltron/plaid",
     "license": "MIT",
     "authors": [
         {
