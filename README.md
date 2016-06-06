@@ -14,10 +14,10 @@ Via Composer
 $ composer require travoltron/plaid
 ```
 
-In `app/config.php` add the following line to the providers array
+In `app/config.php` add the following line to the alias array
 
 ```bash
-Travoltron\Plaid\PlaidServiceProvider::class,
+'Plaid' => 'Travoltron\Plaid\Plaid',
 ```
 
 Publish configuration file
