@@ -31,7 +31,7 @@ php artisan vendor:publish --provider="Travoltron\Plaid\PlaidServiceProvider" --
 
 Add the following line to any file you will be using this library in.
 
-`use Travoltron\Plaid;`
+`use Plaid;`
 
 
 **Auth**
