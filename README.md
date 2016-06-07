@@ -451,6 +451,17 @@ $getCategoryDetail = Plaid::categories('17001013');
 }
 ```
 
+**Link**
+
+For those who are using [Link](https://plaid.com/docs/quickstart/#introduction), you'll need to exchange your `public_token` for a `plaid_token`. 
+
+Example request:
+
+```php
+$plaid_token = Plaid::exchangeToken($public_token);
+```
+
+ 
 
 ## Change log
 
