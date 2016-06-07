@@ -182,8 +182,8 @@ class Plaid
                         'webhook' => $webhook,
                         'pending' => config('plaid.connect.pending'),
                         'list' => config('plaid.connect.list'),
-                        'start_date' => $start,
-                        'end_date' => $end
+                        'gte' => $start,
+                        'lte' => $end
                     ]
                 ]
             ]);
@@ -265,8 +265,8 @@ class Plaid
                     'access_token' => $token,
                     'options' => [
                         'pending' => config('plaid.connect.pending'),
-                        'start_date' => $start,
-                        'end_date' => $end
+                        'gte' => $start,
+                        'lte' => $end
                     ]
                 ]
             ]);
@@ -338,8 +338,8 @@ class Plaid
                     'access_token' => $token,
                     'options' => [
                         'pending' => config('plaid.connect.pending'),
-                        'start_date' => $start,
-                        'end_date' => $end
+                        'gte' => $start,
+                        'lte' => $end
                     ]
                 ]
             ]);
