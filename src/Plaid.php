@@ -92,7 +92,7 @@ class Plaid
                 'body' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
-                    'access_token' => $public_token,
+                    'access_token' => $plaid_token,
                 ]
             ]);
             return $request->json();
@@ -262,7 +262,7 @@ class Plaid
                 'body' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
-                    'access_token' => $token,
+                    'access_token' => $plaid_token,
                     'options' => [
                         'pending' => config('plaid.connect.pending'),
                         'gte' => $start,
