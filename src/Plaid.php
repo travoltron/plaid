@@ -311,7 +311,7 @@ class Plaid
                 'body' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
-                    'access_token' => $token
+                    'access_token' => $plaid_token
                 ]
             ]);
             return $request->json()['accounts'];
@@ -335,7 +335,7 @@ class Plaid
                 'body' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
-                    'access_token' => $token,
+                    'access_token' => $plaid_token,
                     'options' => [
                         'pending' => config('plaid.connect.pending'),
                         'gte' => $start,
@@ -374,7 +374,8 @@ class Plaid
                     'pin' => $pin,
                     'type' => $type,
                     'options' => [
-                        'list' => config('plaid.connect.list')
+                        'list' => config('plaid.connect.list'),
+                        'webhook' => $webhook
                     ]
                 ]
             ]);
@@ -479,7 +480,7 @@ class Plaid
                 'body' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
-                    'access_token' => $token,
+                    'access_token' => $plaid_token,
                 ]
             ]);
             return $request->json();
@@ -850,14 +851,14 @@ class Plaid
     // Search //
     ////////////
 
-    public static function search($query, $product = null, $id = null)
+    public static function search($query, $product = null, $institution_id = null)
     {
         try {
             $request = self::client()->get('institutions/search', [
                 'query' => [
                     'q' => $query,
                     'p' => $product,
-                    'id' => $id
+                    'id' => $institution_id
                 ]
             ]);
             return $request->json();
@@ -874,9 +875,9 @@ class Plaid
      * [$id description]
      * @var [type]
      */
-    public static function categories($id = null)
+    public static function categories($category_id = null)
     {
-        $endpoint = ($id)?'/'.$id:'';
+        $endpoint = ($category_id)?'/'.$category_id:'';
         try {
             $request = self::client()->get('categories'.$endpoint);
             return $request->json();
