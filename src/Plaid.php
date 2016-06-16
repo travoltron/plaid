@@ -903,14 +903,15 @@ class Plaid
      * @param [string]  $public_token Token returned from plaid link
      * @return [type] [description]
      */
-    public static function exchangeToken($public_token)
+    public static function exchangeToken($public_token, $account_id = null)
     {
         try {
             $request = self::client()->post('exchange_token', [
                 'body' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
-                    'public_token' => $public_token
+                    'public_token' => $public_token,
+                    'account_id' => $account_id,
                 ]
             ]);
             return $request->json();
