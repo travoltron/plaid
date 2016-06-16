@@ -900,10 +900,11 @@ class Plaid
     /**
      * [exchangeToken description]
      * @method exchangeToken
-     * @param  [type]        $public_token [description]
-     * @return [type]                      [description]
+     * @param [string]  $public_token Token returned from plaid link
+     * @param [string]  $account_id   Account Id returned from plaid link
+     * @return [type] [description]
      */
-    public static function exchangeToken($public_token)
+    public static function exchangeToken($public_token, $account_id)
     {
         try {
             $request = self::client()->post('exchange_token', [
@@ -911,6 +912,7 @@ class Plaid
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'public_token' => $public_token,
+                    'account_id' => $account_id
                 ]
             ]);
             return $request->json();
@@ -918,5 +920,4 @@ class Plaid
             return $e->getResponse()->json();
         }
     }
-
 }
