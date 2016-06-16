@@ -33,7 +33,7 @@ class Plaid
         try {
             $request = self::client()->post('auth', [
                 'body' => [
-                    'client_id' => config('plaid.client-id'),
+                    'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'username' => $username,
                     'password' => $password,
@@ -63,7 +63,7 @@ class Plaid
         try {
             $request = self::client()->post('auth/step', [
                 'body' => [
-                    'client_id' => config('plaid.client-id'),
+                    'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'mfa' => $mfa,
                     'access_token' => $plaid_token,
@@ -115,7 +115,7 @@ class Plaid
         try {
             $request = self::client()->patch('auth', [
                 'body' => [
-                    'client_id' => config('plaid.client-id'),
+                    'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'username' => $username,
                     'password' => $password,
@@ -140,7 +140,7 @@ class Plaid
         try {
             $request = self::client()->delete('auth', [
                 'body' => [
-                    'client_id' => config('plaid.client-id'),
+                    'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'access_token' => $plaid_token,
                 ]
@@ -171,7 +171,7 @@ class Plaid
         try {
             $request = self::client()->post('connect', [
                 'body' => [
-                    'client_id' => config('plaid.client-id'),
+                    'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'username' => $username,
                     'password' => $password,
@@ -206,7 +206,7 @@ class Plaid
         try {
             $request = self::client()->post('connect/step', [
                 'body' => [
-                    'client_id' => config('plaid.client-id'),
+                    'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'mfa' => $mfa,
                     'access_token' => $plaid_token,
@@ -236,7 +236,7 @@ class Plaid
         try {
             $request = self::client()->patch('connect', [
                 'body' => [
-                    'client_id' => config('plaid.client-id'),
+                    'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'username' => $username,
                     'password' => $password,
@@ -287,7 +287,7 @@ class Plaid
         try {
             $request = self::client()->delete('connect', [
                 'body' => [
-                    'client_id' => config('plaid.client-id'),
+                    'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'access_token' => $plaid_token,
                 ]
@@ -367,7 +367,7 @@ class Plaid
         try {
             $request = self::client()->post('info', [
                 'body' => [
-                    'client_id' => config('plaid.client-id'),
+                    'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'username' => $username,
                     'password' => $password,
@@ -398,7 +398,7 @@ class Plaid
         try {
             $request = self::client()->post('info/step', [
                 'body' => [
-                    'client_id' => config('plaid.client-id'),
+                    'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'mfa' => $mfa,
                     'access_token' => $plaid_token,
@@ -428,7 +428,7 @@ class Plaid
         try {
             $request = self::client()->patch('info', [
                 'body' => [
-                    'client_id' => config('plaid.client-id'),
+                    'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'username' => $username,
                     'password' => $password,
@@ -456,7 +456,7 @@ class Plaid
         try {
             $request = self::client()->delete('info', [
                 'body' => [
-                    'client_id' => config('plaid.client-id'),
+                    'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'access_token' => $plaid_token,
                 ]
@@ -507,7 +507,7 @@ class Plaid
         try {
             $request = self::client()->post('income', [
                 'body' => [
-                    'client_id' => config('plaid.client-id'),
+                    'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'username' => $username,
                     'password' => $password,
@@ -538,7 +538,7 @@ class Plaid
         try {
             $request = self::client()->post('income/step', [
                 'body' => [
-                    'client_id' => config('plaid.client-id'),
+                    'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'mfa' => $mfa,
                     'access_token' => $plaid_token,
@@ -568,7 +568,7 @@ class Plaid
         try {
             $request = self::client()->patch('income', [
                 'body' => [
-                    'client_id' => config('plaid.client-id'),
+                    'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'username' => $username,
                     'password' => $password,
@@ -596,7 +596,7 @@ class Plaid
         try {
             $request = self::client()->delete('income', [
                 'body' => [
-                    'client_id' => config('plaid.client-id'),
+                    'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'access_token' => $plaid_token,
                 ]
@@ -647,7 +647,7 @@ class Plaid
         try {
             $request = self::client()->post('risk', [
                 'body' => [
-                    'client_id' => config('plaid.client-id'),
+                    'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'username' => $username,
                     'password' => $password,
@@ -678,7 +678,7 @@ class Plaid
         try {
             $request = self::client()->post('risk/step', [
                 'body' => [
-                    'client_id' => config('plaid.client-id'),
+                    'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'mfa' => $mfa,
                     'access_token' => $plaid_token,
@@ -708,7 +708,7 @@ class Plaid
         try {
             $request = self::client()->patch('risk', [
                 'body' => [
-                    'client_id' => config('plaid.client-id'),
+                    'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'username' => $username,
                     'password' => $password,
@@ -736,7 +736,7 @@ class Plaid
         try {
             $request = self::client()->delete('risk', [
                 'body' => [
-                    'client_id' => config('plaid.client-id'),
+                    'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'access_token' => $plaid_token,
                 ]
@@ -835,7 +835,7 @@ class Plaid
         try {
             $request = self::client()->post('institutions/longtail', [
                 'body' => [
-                    'client_id' => config('plaid.client-id'),
+                    'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'count' => $count,
                     'offset' => $offset
