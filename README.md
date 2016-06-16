@@ -17,7 +17,7 @@ $ composer require travoltron/plaid
 In `app/config.php` add the following line to the alias array
 
 ```bash
-'Plaid' => 'Travoltron\Plaid\Plaid',
+'Plaid' => 'Travoltron\Plaid\Plaid::class',
 ```
 
 Publish configuration file

@@ -853,18 +853,20 @@ class Plaid
 
     public static function search($query, $product = null, $institution_id = null)
     {
+        $queryArray = [
+            'q' => $query,
+            'p' => $product,
+            'id' => $institution_id
+        ];
+        if(!$product) {
+            unset($queryArray['p']);
+        }
+        if(!$institution_id) {
+            unset($queryArray['id']);
+        }
         try {
-            $queryParams = [];
-            if($institution_id !== null) {
-                $queryParams['id'] = $institution_id;
-            } else {
-                $queryParams['q'] = $query;
-                if($product !== null) {
-                    $queryParams['p'] = $product;
-                }
-            }
             $request = self::client()->get('institutions/search', [
-                'query' => $queryParams
+                'query' => $queryArray
             ]);
             return $request->json();
         } catch (RequestException $e) {
