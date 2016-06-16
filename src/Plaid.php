@@ -166,8 +166,8 @@ class Plaid
      */
     public static function addConnectUser($username, $password, $pin = null, $type, $webhook, $start_date = null, $end_date = null)
     {
-        $start = ($start_date?Carbon::parse($start_date)->toDateString():Carbon::now()->subDays(config('plaid.connect.start_date'))->toDateString());
-        $end = ($end_date?Carbon::parse($end_date)->toDateString():Carbon::now()->subDays(config('plaid.connect.end_date'))->toDateString());
+        $start = ($start_date ? Carbon::parse($start_date)->toDateString() : Carbon::now()->subDays(config('plaid.connect.start_date'))->toDateString());
+        $end = ($end_date ? Carbon::parse($end_date)->toDateString() : Carbon::now()->subDays(config('plaid.connect.end_date'))->toDateString());
         try {
             $request = self::client()->post('connect', [
                 'body' => [
@@ -255,8 +255,8 @@ class Plaid
 
     public static function getConnectData($plaid_token, $start_date = null, $end_date = null)
     {
-        $start = ($start_date?Carbon::parse($start_date)->toDateString():Carbon::now()->subDays(config('plaid.connect.start_date'))->toDateString());
-        $end = ($end_date?Carbon::parse($end_date)->toDateString():Carbon::now()->subDays(config('plaid.connect.end_date'))->toDateString());
+        $start = ($start_date ? Carbon::parse($start_date)->toDateString() : Carbon::now()->subDays(config('plaid.connect.start_date'))->toDateString());
+        $end = ($end_date ? Carbon::parse($end_date)->toDateString() : Carbon::now()->subDays(config('plaid.connect.end_date'))->toDateString());
         try {
             $request = self::client()->post('connect/get', [
                 'body' => [
@@ -328,8 +328,8 @@ class Plaid
      */
     public static function getConnectTransactions($plaid_token, $start_date = null, $end_date = null)
     {
-        $start = ($start_date?Carbon::parse($start_date)->toDateString():Carbon::now()->subDays(config('plaid.connect.start_date'))->toDateString());
-        $end = ($end_date?Carbon::parse($end_date)->toDateString():Carbon::now()->subDays(config('plaid.connect.end_date'))->toDateString());
+        $start = ($start_date ? Carbon::parse($start_date)->toDateString() : Carbon::now()->subDays(config('plaid.connect.start_date'))->toDateString());
+        $end = ($end_date ? Carbon::parse($end_date)->toDateString() : Carbon::now()->subDays(config('plaid.connect.end_date'))->toDateString());
         try {
             $request = self::client()->post('connect/get', [
                 'body' => [
@@ -900,24 +900,27 @@ class Plaid
     /**
      * [exchangeToken description]
      * @method exchangeToken
-     * @param  [type]        $public_token [description]
-     * @return [type]                      [description]
+     * @param [string]  $public_token Token returned from plaid link
+     * @return [type] [description]
      */
     public static function exchangeToken($public_token, $account_id = null)
     {
+        $bodyArray = [
+            'client_id' => config('plaid.client_id'),
+            'secret' => config('plaid.secret'),
+            'public_token' => $public_token,
+            'account_id' => $account_id,
+        ];
+        if(!$account_id) {
+            unset($bodyArray['account_id']);
+        }
         try {
             $request = self::client()->post('exchange_token', [
-                'body' => [
-                    'client_id' => config('plaid.client_id'),
-                    'secret' => config('plaid.secret'),
-                    'public_token' => $public_token,
-                    'account_id' => $account_id,
-                ]
+                'body' => $bodyArray
             ]);
             return $request->json();
         } catch (RequestException $e) {
             return $e->getResponse()->json();
         }
     }
-
 }
