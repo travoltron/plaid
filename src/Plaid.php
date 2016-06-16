@@ -905,14 +905,18 @@ class Plaid
      */
     public static function exchangeToken($public_token, $account_id = null)
     {
+        $bodyArray = [
+            'client_id' => config('plaid.client_id'),
+            'secret' => config('plaid.secret'),
+            'public_token' => $public_token,
+            'account_id' => $account_id,
+        ];
+        if(!$account_id) {
+            unset($bodyArray['account_id']);
+        }
         try {
             $request = self::client()->post('exchange_token', [
-                'body' => [
-                    'client_id' => config('plaid.client_id'),
-                    'secret' => config('plaid.secret'),
-                    'public_token' => $public_token,
-                    'account_id' => $account_id,
-                ]
+                'body' => $bodyArray
             ]);
             return $request->json();
         } catch (RequestException $e) {
