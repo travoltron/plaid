@@ -32,7 +32,7 @@ class Plaid
     {
         try {
             $request = self::client()->post('auth', [
-                'form_params' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'username' => $username,
@@ -62,7 +62,7 @@ class Plaid
     {
         try {
             $request = self::client()->post('auth/step', [
-                'form_params' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'mfa' => $mfa,
@@ -89,7 +89,7 @@ class Plaid
     {
         try {
             $request = self::client()->post('auth/get', [
-                'form_params' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'access_token' => $plaid_token,
@@ -114,7 +114,7 @@ class Plaid
     {
         try {
             $request = self::client()->patch('auth', [
-                'form_params' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'username' => $username,
@@ -139,7 +139,7 @@ class Plaid
     {
         try {
             $request = self::client()->delete('auth', [
-                'form_params' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'access_token' => $plaid_token,
@@ -170,7 +170,7 @@ class Plaid
         $end = ($end_date ? Carbon::parse($end_date)->toDateString() : Carbon::now()->subDays(config('plaid.connect.end_date'))->toDateString());
         try {
             $request = self::client()->post('connect', [
-                'form_params' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'username' => $username,
@@ -205,7 +205,7 @@ class Plaid
     {
         try {
             $request = self::client()->post('connect/step', [
-                'form_params' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'mfa' => $mfa,
@@ -235,7 +235,7 @@ class Plaid
     {
         try {
             $request = self::client()->patch('connect', [
-                'form_params' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'username' => $username,
@@ -259,7 +259,7 @@ class Plaid
         $end = ($end_date ? Carbon::parse($end_date)->toDateString() : Carbon::now()->subDays(config('plaid.connect.end_date'))->toDateString());
         try {
             $request = self::client()->post('connect/get', [
-                'form_params' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'access_token' => $plaid_token,
@@ -286,7 +286,7 @@ class Plaid
     {
         try {
             $request = self::client()->delete('connect', [
-                'form_params' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'access_token' => $plaid_token,
@@ -308,7 +308,7 @@ class Plaid
     {
         try {
             $request = self::client()->post('connect/get', [
-                'form_params' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'access_token' => $plaid_token
@@ -332,7 +332,7 @@ class Plaid
         $end = ($end_date ? Carbon::parse($end_date)->toDateString() : Carbon::now()->subDays(config('plaid.connect.end_date'))->toDateString());
         try {
             $request = self::client()->post('connect/get', [
-                'form_params' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'access_token' => $plaid_token,
@@ -366,7 +366,7 @@ class Plaid
     {
         try {
             $request = self::client()->post('info', [
-                'form_params' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'username' => $username,
@@ -397,7 +397,7 @@ class Plaid
     {
         try {
             $request = self::client()->post('info/step', [
-                'form_params' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'mfa' => $mfa,
@@ -427,7 +427,7 @@ class Plaid
     {
         try {
             $request = self::client()->patch('info', [
-                'form_params' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'username' => $username,
@@ -455,7 +455,7 @@ class Plaid
     {
         try {
             $request = self::client()->delete('info', [
-                'form_params' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'access_token' => $plaid_token,
@@ -477,7 +477,7 @@ class Plaid
     {
         try {
             $request = self::client()->post('info/get', [
-                'form_params' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'access_token' => $plaid_token,
@@ -506,7 +506,7 @@ class Plaid
     {
         try {
             $request = self::client()->post('income', [
-                'form_params' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'username' => $username,
@@ -537,7 +537,7 @@ class Plaid
     {
         try {
             $request = self::client()->post('income/step', [
-                'form_params' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'mfa' => $mfa,
@@ -567,7 +567,7 @@ class Plaid
     {
         try {
             $request = self::client()->patch('income', [
-                'form_params' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'username' => $username,
@@ -595,7 +595,7 @@ class Plaid
     {
         try {
             $request = self::client()->delete('income', [
-                'form_params' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'access_token' => $plaid_token,
@@ -617,7 +617,7 @@ class Plaid
     {
         try {
             $request = self::client()->post('income/get', [
-                'form_params' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'access_token' => $plaid_token
@@ -646,7 +646,7 @@ class Plaid
     {
         try {
             $request = self::client()->post('risk', [
-                'form_params' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'username' => $username,
@@ -677,7 +677,7 @@ class Plaid
     {
         try {
             $request = self::client()->post('risk/step', [
-                'form_params' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'mfa' => $mfa,
@@ -707,7 +707,7 @@ class Plaid
     {
         try {
             $request = self::client()->patch('risk', [
-                'form_params' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'username' => $username,
@@ -735,7 +735,7 @@ class Plaid
     {
         try {
             $request = self::client()->delete('risk', [
-                'form_params' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'access_token' => $plaid_token,
@@ -757,7 +757,7 @@ class Plaid
     {
         try {
             $request = self::client()->post('risk/get', [
-                'form_params' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'access_token' => $plaid_token
@@ -783,7 +783,7 @@ class Plaid
     {
         try {
             $request = self::client()->post('balance', [
-                'form_params' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'access_token' => $plaid_token
@@ -810,7 +810,7 @@ class Plaid
     {
         try {
             $request = self::client()->post('upgrade', [
-                'form_params' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'access_token' => $plaid_token,
@@ -834,7 +834,7 @@ class Plaid
     {
         try {
             $request = self::client()->post('institutions/longtail', [
-                'form_params' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'count' => $count,
@@ -916,7 +916,7 @@ class Plaid
         }
         try {
             $request = self::client()->post('exchange_token', [
-                'form_params' => $bodyArray
+                'json' => $bodyArray
             ]);
             return $request->json();
         } catch (RequestException $e) {
