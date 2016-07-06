@@ -13,7 +13,7 @@ class Plaid
      */
     public static function client()
     {
-        return new Guzzle(['base_url' => config('plaid.baseUrl')]);
+        return new Guzzle(['base_uri' => config('plaid.baseUrl')]);
     }
 
     //////////
