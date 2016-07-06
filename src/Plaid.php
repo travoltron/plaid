@@ -44,9 +44,9 @@ class Plaid
                     ]
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -73,9 +73,9 @@ class Plaid
                     ]
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -95,9 +95,9 @@ class Plaid
                     'access_token' => $plaid_token,
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -123,9 +123,9 @@ class Plaid
                     'access_token' => $plaid_token
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -145,9 +145,9 @@ class Plaid
                     'access_token' => $plaid_token,
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -187,9 +187,9 @@ class Plaid
                     ]
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -215,9 +215,9 @@ class Plaid
                     ]
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -247,9 +247,9 @@ class Plaid
                     ]
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -270,9 +270,9 @@ class Plaid
                     ]
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -292,9 +292,9 @@ class Plaid
                     'access_token' => $plaid_token,
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -314,9 +314,9 @@ class Plaid
                     'access_token' => $plaid_token
                 ]
             ]);
-            return $request->json()['accounts'];
+            return json_decode($request->getBody(), true)['accounts'];
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -343,9 +343,9 @@ class Plaid
                     ]
                 ]
             ]);
-            return $request->json()['transactions'];
+            return json_decode($request->getBody(), true)['transactions'];
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -379,9 +379,9 @@ class Plaid
                     ]
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -407,9 +407,9 @@ class Plaid
                     ]
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -439,9 +439,9 @@ class Plaid
                     ]
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -461,9 +461,9 @@ class Plaid
                     'access_token' => $plaid_token,
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -483,9 +483,9 @@ class Plaid
                     'access_token' => $plaid_token,
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -519,9 +519,9 @@ class Plaid
                     ]
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -547,9 +547,9 @@ class Plaid
                     ]
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -579,9 +579,9 @@ class Plaid
                     ]
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -601,9 +601,9 @@ class Plaid
                     'access_token' => $plaid_token,
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -623,9 +623,9 @@ class Plaid
                     'access_token' => $plaid_token
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -659,9 +659,9 @@ class Plaid
                     ]
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -687,9 +687,9 @@ class Plaid
                     ]
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -719,9 +719,9 @@ class Plaid
                     ]
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -741,9 +741,9 @@ class Plaid
                     'access_token' => $plaid_token,
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -763,9 +763,9 @@ class Plaid
                     'access_token' => $plaid_token
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -789,9 +789,9 @@ class Plaid
                     'access_token' => $plaid_token
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -820,9 +820,9 @@ class Plaid
                     ]
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -843,7 +843,7 @@ class Plaid
             ]);
             return $request->getBody();
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -868,9 +868,9 @@ class Plaid
             $request = self::client()->get('institutions/search', [
                 'query' => $queryArray
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -887,9 +887,9 @@ class Plaid
         $endpoint = ($category_id)?'/'.$category_id:'';
         try {
             $request = self::client()->get('categories'.$endpoint);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -918,9 +918,9 @@ class Plaid
             $request = self::client()->post('exchange_token', [
                 'json' => $bodyArray
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 }
