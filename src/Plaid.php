@@ -13,7 +13,7 @@ class Plaid
      */
     public static function client()
     {
-        return new Guzzle(['base_url' => config('plaid.baseUrl')]);
+        return new Guzzle(['base_uri' => config('plaid.baseUrl')]);
     }
 
     //////////
@@ -32,7 +32,7 @@ class Plaid
     {
         try {
             $request = self::client()->post('auth', [
-                'body' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'username' => $username,
@@ -44,9 +44,9 @@ class Plaid
                     ]
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -62,7 +62,7 @@ class Plaid
     {
         try {
             $request = self::client()->post('auth/step', [
-                'body' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'mfa' => $mfa,
@@ -73,9 +73,9 @@ class Plaid
                     ]
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -89,15 +89,15 @@ class Plaid
     {
         try {
             $request = self::client()->post('auth/get', [
-                'body' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'access_token' => $plaid_token,
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -114,7 +114,7 @@ class Plaid
     {
         try {
             $request = self::client()->patch('auth', [
-                'body' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'username' => $username,
@@ -123,9 +123,9 @@ class Plaid
                     'access_token' => $plaid_token
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -139,15 +139,15 @@ class Plaid
     {
         try {
             $request = self::client()->delete('auth', [
-                'body' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'access_token' => $plaid_token,
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -170,7 +170,7 @@ class Plaid
         $end = ($end_date ? Carbon::parse($end_date)->toDateString() : Carbon::now()->subDays(config('plaid.connect.end_date'))->toDateString());
         try {
             $request = self::client()->post('connect', [
-                'body' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'username' => $username,
@@ -187,9 +187,9 @@ class Plaid
                     ]
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -205,7 +205,7 @@ class Plaid
     {
         try {
             $request = self::client()->post('connect/step', [
-                'body' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'mfa' => $mfa,
@@ -215,9 +215,9 @@ class Plaid
                     ]
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -235,7 +235,7 @@ class Plaid
     {
         try {
             $request = self::client()->patch('connect', [
-                'body' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'username' => $username,
@@ -247,9 +247,9 @@ class Plaid
                     ]
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -259,7 +259,7 @@ class Plaid
         $end = ($end_date ? Carbon::parse($end_date)->toDateString() : Carbon::now()->subDays(config('plaid.connect.end_date'))->toDateString());
         try {
             $request = self::client()->post('connect/get', [
-                'body' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'access_token' => $plaid_token,
@@ -270,9 +270,9 @@ class Plaid
                     ]
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -286,15 +286,15 @@ class Plaid
     {
         try {
             $request = self::client()->delete('connect', [
-                'body' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'access_token' => $plaid_token,
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -308,15 +308,15 @@ class Plaid
     {
         try {
             $request = self::client()->post('connect/get', [
-                'body' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'access_token' => $plaid_token
                 ]
             ]);
-            return $request->json()['accounts'];
+            return json_decode($request->getBody(), true)['accounts'];
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -332,7 +332,7 @@ class Plaid
         $end = ($end_date ? Carbon::parse($end_date)->toDateString() : Carbon::now()->subDays(config('plaid.connect.end_date'))->toDateString());
         try {
             $request = self::client()->post('connect/get', [
-                'body' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'access_token' => $plaid_token,
@@ -343,9 +343,9 @@ class Plaid
                     ]
                 ]
             ]);
-            return $request->json()['transactions'];
+            return json_decode($request->getBody(), true)['transactions'];
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -366,7 +366,7 @@ class Plaid
     {
         try {
             $request = self::client()->post('info', [
-                'body' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'username' => $username,
@@ -379,9 +379,9 @@ class Plaid
                     ]
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -397,7 +397,7 @@ class Plaid
     {
         try {
             $request = self::client()->post('info/step', [
-                'body' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'mfa' => $mfa,
@@ -407,9 +407,9 @@ class Plaid
                     ]
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -427,7 +427,7 @@ class Plaid
     {
         try {
             $request = self::client()->patch('info', [
-                'body' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'username' => $username,
@@ -439,9 +439,9 @@ class Plaid
                     ]
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -455,15 +455,15 @@ class Plaid
     {
         try {
             $request = self::client()->delete('info', [
-                'body' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'access_token' => $plaid_token,
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -477,15 +477,15 @@ class Plaid
     {
         try {
             $request = self::client()->post('info/get', [
-                'body' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'access_token' => $plaid_token,
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -506,7 +506,7 @@ class Plaid
     {
         try {
             $request = self::client()->post('income', [
-                'body' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'username' => $username,
@@ -519,9 +519,9 @@ class Plaid
                     ]
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -537,7 +537,7 @@ class Plaid
     {
         try {
             $request = self::client()->post('income/step', [
-                'body' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'mfa' => $mfa,
@@ -547,9 +547,9 @@ class Plaid
                     ]
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -567,7 +567,7 @@ class Plaid
     {
         try {
             $request = self::client()->patch('income', [
-                'body' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'username' => $username,
@@ -579,9 +579,9 @@ class Plaid
                     ]
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -595,15 +595,15 @@ class Plaid
     {
         try {
             $request = self::client()->delete('income', [
-                'body' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'access_token' => $plaid_token,
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -617,15 +617,15 @@ class Plaid
     {
         try {
             $request = self::client()->post('income/get', [
-                'body' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'access_token' => $plaid_token
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -646,7 +646,7 @@ class Plaid
     {
         try {
             $request = self::client()->post('risk', [
-                'body' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'username' => $username,
@@ -659,9 +659,9 @@ class Plaid
                     ]
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -677,7 +677,7 @@ class Plaid
     {
         try {
             $request = self::client()->post('risk/step', [
-                'body' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'mfa' => $mfa,
@@ -687,9 +687,9 @@ class Plaid
                     ]
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -707,7 +707,7 @@ class Plaid
     {
         try {
             $request = self::client()->patch('risk', [
-                'body' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'username' => $username,
@@ -719,9 +719,9 @@ class Plaid
                     ]
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -735,15 +735,15 @@ class Plaid
     {
         try {
             $request = self::client()->delete('risk', [
-                'body' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'access_token' => $plaid_token,
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -757,15 +757,15 @@ class Plaid
     {
         try {
             $request = self::client()->post('risk/get', [
-                'body' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'access_token' => $plaid_token
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -783,15 +783,15 @@ class Plaid
     {
         try {
             $request = self::client()->post('balance', [
-                'body' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'access_token' => $plaid_token
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -810,7 +810,7 @@ class Plaid
     {
         try {
             $request = self::client()->post('upgrade', [
-                'body' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'access_token' => $plaid_token,
@@ -820,9 +820,9 @@ class Plaid
                     ]
                 ]
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -834,7 +834,7 @@ class Plaid
     {
         try {
             $request = self::client()->post('institutions/longtail', [
-                'body' => [
+                'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'count' => $count,
@@ -843,7 +843,7 @@ class Plaid
             ]);
             return $request->getBody();
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -868,9 +868,9 @@ class Plaid
             $request = self::client()->get('institutions/search', [
                 'query' => $queryArray
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -887,9 +887,9 @@ class Plaid
         $endpoint = ($category_id)?'/'.$category_id:'';
         try {
             $request = self::client()->get('categories'.$endpoint);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 
@@ -916,11 +916,11 @@ class Plaid
         }
         try {
             $request = self::client()->post('exchange_token', [
-                'body' => $bodyArray
+                'json' => $bodyArray
             ]);
-            return $request->json();
+            return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
-            return $e->getResponse()->json();
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
     }
 }
