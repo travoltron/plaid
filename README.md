@@ -20,6 +20,12 @@ In `app/config.php` add the following line to the alias array
 'Plaid' => Travoltron\Plaid\Plaid::class,
 ```
 
+In `app/config.php` add the following line to the providers array
+
+```bash
+Travoltron\Plaid\PlaidServiceProvider::class,
+```
+
 Publish configuration file
 
 ```bash
