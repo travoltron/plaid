@@ -2,8 +2,8 @@
 
 use Travoltron\Plaid;
 
-class PlaidTest extends PHPUnit_Framework_TestCase {
-
+class PlaidTest extends PHPUnit_Framework_TestCase
+{
     public function testContactPlaid()
     {
         $categories = Plaid::categories();

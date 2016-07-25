@@ -858,10 +858,10 @@ class Plaid
             'p' => $product,
             'id' => $institution_id
         ];
-        if(!$product) {
+        if (!$product) {
             unset($queryArray['p']);
         }
-        if(!$institution_id) {
+        if (!$institution_id) {
             unset($queryArray['id']);
         }
         try {
@@ -911,7 +911,7 @@ class Plaid
             'public_token' => $public_token,
             'account_id' => $account_id,
         ];
-        if(!$account_id) {
+        if (!$account_id) {
             unset($bodyArray['account_id']);
         }
         try {
