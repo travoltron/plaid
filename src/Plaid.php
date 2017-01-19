@@ -874,6 +874,23 @@ class Plaid
         }
     }
 
+    public static function searchType($product)
+    {
+        try {
+            $request = self::client()->post('institutions/all', [
+                'json' => [
+                    'products' => '["'.$product.'"]',
+                    'client_id' => config('plaid.client_id', '547611a6d7d486893dab292a'),
+                    'secret' => config('plaid.secret', 'aDvuL4td9VdJzqhTqzwR5s'),
+                    'count' => 200
+                ]
+            ]);
+            return json_decode($request->getBody(), true);
+        } catch (RequestException $e) {
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
+        }
+    }
+
     ////////////////
     // Categories //
     ////////////////
