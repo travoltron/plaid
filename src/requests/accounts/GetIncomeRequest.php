@@ -13,6 +13,9 @@ class GetIncomeRequest extends FormRequest
      */
     public function authorize()
     {
+        if(!$this->header('uuid') || !\App\Models\User::uuid($this->header('uuid'))) {
+            return false;
+        }
         return true;
     }
 
