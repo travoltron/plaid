@@ -1,6 +1,7 @@
 <?php
 
 Route::group(['prefix' => config('plaid.prefix')], function() {
+    Route::post('webhook', 'Travoltron\Plaid\Controllers\WebhookController@incoming')->name('plaidWebhook');
     Route::group(['prefix' => 'account'], function() {
         // Users
         Route::post('add', 'Travoltron\Plaid\Controllers\AuthController@addAccount');

@@ -9,6 +9,8 @@ return [
     'client_id' => (env('APP_ENV') !== 'production'?'test_id':env('PLAID_CLIENT_ID')),
     'secret' => (env('APP_ENV') !== 'production'?'test_secret':env('PLAID_SECRET')),
     'prefix' => 'plaid',
+    'webhook' => route('plaidObserver'),
+    'slackChannel' => '@ben', // change this to whatever works for you.
     'autoupgrade' => true,
     'auth' => [
         'list' => false,

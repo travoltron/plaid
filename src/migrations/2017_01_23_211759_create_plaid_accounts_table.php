@@ -30,6 +30,11 @@ class CreatePlaidAccountsTable extends Migration
             $table->decimal('apr', 4, 2);
             $table->decimal('minimumPayment', 15, 2);
             $table->boolean('smartsave')->index()->unsigned()->default(false);
+            $table->boolean('plaidAuth')->default(false);
+            $table->boolean('plaidConnect')->index()->unsigned()->default(false);
+            $table->boolean('plaidIncome')->index()->unsigned()->default(false);
+            $table->boolean('plaidInfo')->index()->unsigned()->default(false);
+            $table->boolean('plaidRisk')->index()->unsigned()->default(false);
             $table->timestamps();
             $table->softDeletes();
         });
