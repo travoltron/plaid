@@ -16,11 +16,16 @@ class PlaidServiceProvider extends ServiceProvider
         // Load up routes
         include __DIR__.'/routes/routes.php';
         // Copy config file to config directory
-        $this->publishes([__DIR__.'/config/plaid.php' => config_path('plaid.php')], 'config');
+        $this->publishes([
+            __DIR__.'/config/plaid.php' => config_path('plaid.php')], 'config');
+        // Publish models
+        $this->publishes([
+            __DIR__.'/models' => base_path('app/Models')], 'models');
+        // Publish migrations for use
+        $this->publishes([__DIR__.'/migrations' => database_path('/migrations')], 'migrations');
         // Publish tests to be run as part of parent install
         $this->publishes([
-            __DIR__.'/../tests/PlaidTest.php' => base_path('tests/PlaidTest.php')
-        ]);
+            __DIR__.'/../tests/PlaidTest.php' => base_path('tests/PlaidTest.php')], 'tests');
     }
 
     /**

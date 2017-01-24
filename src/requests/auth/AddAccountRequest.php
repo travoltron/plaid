@@ -13,6 +13,9 @@ class AddAccountRequest extends FormRequest
      */
     public function authorize()
     {
+        if(!$this->request->get('uuid') || !\App\Models\User::uuid($this->request->get('uuid'))) {
+            return false;
+        }
         return true;
     }
 

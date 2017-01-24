@@ -13,6 +13,9 @@ class UpgradeAccountRequest extends FormRequest
      */
     public function authorize()
     {
+        if(!$this->request->get('uuid')) {
+            return false;
+        }
         return true;
     }
 

@@ -16,7 +16,7 @@ class AuthController extends BaseController
         if($this->authable($request->input('type'))) {
             $auth = Plaid::addAuthUser($request->input('username'), $request->input('password'), $request->input('pin', null), $request->input('type'));
         } else {
-            $auth = Plaid::addConnectUser($request->input('username'), $request->input('password'), $request->input('pin', null), $request->input('type'), 'http://requestb.in/p4mqsrp4');
+            $auth = Plaid::addConnectUser($request->input('username'), $request->input('password'), $request->input('pin', null), $request->input('type'), 'http://requestb.in/vveeccvv');
         }
         if($this->needsMfa($auth)) {
             return $this->needsMfa($auth);
@@ -27,6 +27,8 @@ class AuthController extends BaseController
         if(config('plaid.autoupgrade')) {
             $this->upgradeTo(['all'], $auth['access_token']);
         }
+        // Stash the token
+        $this->storeToken($request->header('uuid'), $auth['access_token']);
         return $this->successFormatter($auth);
     }
 
@@ -46,12 +48,21 @@ class AuthController extends BaseController
         if(config('plaid.autoupgrade')) {
             $this->upgradeTo(['all'], $auth['access_token']);
         }
+        $this->storeToken($request->header('uuid'), $auth['access_token']);
         return $this->successFormatter($auth);
     }
 
     public function upgradeAccount(UpgradeAccountRequest $request)
     {
         $this->upgradeTo($request->input('products'), $request->input('token'));
+    }
+
+    protected function storeToken(string $uuid, string $token)
+    {
+        $savedToken = \App\Models\PlaidToken::firstOrCreate([
+            'uuid' => $uuid,
+            'token' => $token
+            ]);
     }
 
     protected function needsMfa($reply)
@@ -92,12 +103,12 @@ class AuthController extends BaseController
         $products = collect($product);
         if($products->contains('all')) {
             $upgrade = collect($all)->map(function($product) use ($token) {
-                return Plaid::upgrade($token, $product, 'http://requestb.in/p4mqsrp4');
+                return Plaid::upgrade($token, $product, 'http://requestb.in/vveeccvv');
             });
         }
         if(!$products->contains('all')) {
             $upgrade = collect($products)->map(function($product) use ($token) {
-                return Plaid::upgrade($token, $product, 'http://requestb.in/p4mqsrp4');
+                return Plaid::upgrade($token, $product, 'http://requestb.in/vveeccvv');
             });
         }
 
