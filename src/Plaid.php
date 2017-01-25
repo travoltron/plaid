@@ -910,6 +910,23 @@ class Plaid
         }
     }
 
+
+    public static function creditDetails($access_token) {
+
+        try {
+            $request = self::client()->post('creditdetails/get', [
+                'json' => [
+                    'client_id' => config('plaid.client-id'),
+                    'secret' => config('plaid.secret'),
+                    'access_token' => $access_token,
+                ]
+            ]);
+            return json_decode($request->getBody(), true);
+        } catch (RequestException $e) {
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
+        }
+    }
+
     //////////
     // Link //
     //////////
