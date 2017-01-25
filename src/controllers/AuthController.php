@@ -16,7 +16,7 @@ class AuthController extends BaseController
         if($this->authable($request->input('type'))) {
             $auth = Plaid::addAuthUser($request->input('username'), $request->input('password'), $request->input('pin', null), $request->input('type'));
         } else {
-            $auth = Plaid::addConnectUser($request->input('username'), $request->input('password'), $request->input('pin', null), $request->input('type'), 'http://requestb.in/vveeccvv');
+            $auth = Plaid::addConnectUser($request->input('username'), $request->input('password'), $request->input('pin', null), $request->input('type'), config('plaid.webhook'));
         }
         if($this->needsMfa($auth)) {
             return $this->needsMfa($auth);
@@ -29,6 +29,7 @@ class AuthController extends BaseController
         }
         // Stash the token
         $this->storeToken($request->header('uuid'), $auth['access_token']);
+        $this->storeAccounts($request->header('uuid'), $auth['accounts']);
         return $this->successFormatter($auth);
     }
 
@@ -49,6 +50,7 @@ class AuthController extends BaseController
             $this->upgradeTo(['all'], $auth['access_token']);
         }
         $this->storeToken($request->header('uuid'), $auth['access_token']);
+        $this->storeAccounts($request->header('uuid'), $auth['accounts']);
         return $this->successFormatter($auth);
     }
 
@@ -63,6 +65,11 @@ class AuthController extends BaseController
             'uuid' => $uuid,
             'token' => $token
             ]);
+    }
+
+    protected function storeAccounts(string $uuid, array $accounts)
+    {
+        dd($accounts);
     }
 
     protected function needsMfa($reply)
@@ -103,16 +110,15 @@ class AuthController extends BaseController
         $products = collect($product);
         if($products->contains('all')) {
             $upgrade = collect($all)->map(function($product) use ($token) {
-                return Plaid::upgrade($token, $product, 'http://requestb.in/vveeccvv');
+                return Plaid::upgrade($token, $product, config('plaid.webhook'));
             });
         }
         if(!$products->contains('all')) {
             $upgrade = collect($products)->map(function($product) use ($token) {
-                return Plaid::upgrade($token, $product, 'http://requestb.in/vveeccvv');
+                return Plaid::upgrade($token, $product, config('plaid.webhook'));
             });
         }
-
-        return 'nope';
+        return;
     }
 
     protected function errorFormatter($code)

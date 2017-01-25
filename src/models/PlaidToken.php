@@ -6,5 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class PlaidToken extends Model
 {
-
+    protected $fillable = ['token', 'uuid'];
 }
