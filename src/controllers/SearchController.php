@@ -12,18 +12,31 @@ class SearchController extends BaseController
 {
     public function searchName(SearchNameRequest $request)
     {
-        $banks = Plaid::search($request->input('query'));
-        if(!collect($banks)->isEmpty()) {
+        $banks = collect(Plaid::search($request->input('query')));
+        if(!$banks->isEmpty()) {
+            $results = $banks->map(function($bank) {
+                return [
+                    'name' => $bank['name'],
+                    'id' => $bank['id'],
+                    'logo' => $bank['logo'],
+                    'fields' => $bank['fields']
+                ];
+            });
             return response()->json([
                 'status' => 200,
-                'data' => $banks,
-                'errors' => []
+                'banks' => $results,
             ], 200);
         }
         return response()->json([
             'status' => 404,
             'data' => [],
             'errors' => 'No results found'], 404);
+    }
+
+    public function searchId(SearchIdRequest $request)
+    {
+        $bank = collect(Plaid::searchId($request->input('id')));
+        dd($bank);
     }
 
     public function searchProduct(SearchTypeRequest $request)

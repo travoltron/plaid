@@ -11,6 +11,7 @@ return [
     'prefix' => 'plaid',
     'webhook' => (env('APP_ENV') === 'local'?'http://requestb.in/1dm3d8e1':route('plaidObserver')),
     'slackChannel' => '@ben', // change this to whatever works for you.
+    'stripFakes' => true, // this will remove the 'fake_institution' from being resolved in saving the accounts
     'autoupgrade' => true,
     'auth' => [
         'list' => false,
@@ -29,7 +30,9 @@ return [
     'risk' => [
         'list' => false
     ],
-    'transactionModel' => \App\Models\PlaidTransactions::class,
+    'tokenModel' => \App\Models\PlaidToken::class,
+    'accountModel' => \App\Models\PlaidAccount::class,
+    'transactionModel' => \App\Models\PlaidTransaction::class,
     'code' => [
         '1000' => [
             'http' => 400,

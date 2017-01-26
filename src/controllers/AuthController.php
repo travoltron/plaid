@@ -29,7 +29,7 @@ class AuthController extends BaseController
         }
         // Stash the token
         $this->storeToken($request->header('uuid'), $auth['access_token']);
-        $this->storeAccounts($request->header('uuid'), $auth['accounts']);
+        $this->storeAccounts($request->header('uuid'), $auth['access_token'], $request->input('type'));
         return $this->successFormatter($auth);
     }
 
@@ -50,7 +50,7 @@ class AuthController extends BaseController
             $this->upgradeTo(['all'], $auth['access_token']);
         }
         $this->storeToken($request->header('uuid'), $auth['access_token']);
-        $this->storeAccounts($request->header('uuid'), $auth['accounts']);
+        $this->storeAccounts($request->header('uuid'), $auth['access_token'], $request->input('type'));
         return $this->successFormatter($auth);
     }
 
@@ -61,15 +61,59 @@ class AuthController extends BaseController
 
     protected function storeToken(string $uuid, string $token)
     {
-        $savedToken = \App\Models\PlaidToken::firstOrCreate([
+        $savedToken = config('plaid.tokenModel')::create([
             'uuid' => $uuid,
             'token' => $token
-            ]);
+        ]);
     }
 
-    protected function storeAccounts(string $uuid, array $accounts)
+    protected function storeAccounts(string $uuid, string $token, string $type)
     {
-        dd($accounts);
+        $accounts = Plaid::creditDetails($token);
+
+        $extraInfo = (config('plaid.stripFakes')) ? collect(Plaid::searchId(str_replace('test_', '', $accounts['access_token'])))->toArray() : collect(Plaid::searchId($accounts['access_token']))->toArray();
+        $search = collect(Plaid::search($extraInfo['name']));
+        $lookup = $search->search(function($bank) use ($extraInfo) {
+            return $bank['name'] === $extraInfo['name'];
+        });
+        $logo = $search->toArray()[$lookup]['logo'];
+        $savedAccounts = collect($accounts['accounts'])->each(function($account) use ($uuid, $extraInfo, $logo) {
+            $spendingLimit = $account['meta']['limit'] ?? 0.00;
+            $apr =  array_key_exists('creditDetails', $account['meta']) ? $account['meta']['creditDetails']['aprs']['purchases']['apr'] * 100 : 0.00;
+            $minimumPayment = ($account['meta']['creditDetails']['minimumPaymentAmount'] ?? 0.00);
+            config('plaid.accountModel')::create([
+                'uuid' => $uuid,
+                'institutionName' => $extraInfo['name'],
+                'logo' => $logo,
+                'accountName' => $account['meta']['name'],
+                'accountId' => $account['_id'],
+                'last4' => $account['meta']['number'],
+                'type' => ($account['type'] === 'depository') ? $account['subtype'] : $account['type'],
+                'accountNumber' => null,
+                'routingNumber' => null,
+                'balance' => $account['balance']['current'],
+                'spendingLimit' => $spendingLimit,
+                'apr' => $apr,
+                'minimumPayment' => $minimumPayment,
+                'smartsave' => false,
+                'plaidAuth' => (in_array('auth', $extraInfo['products'])) ? true : false,
+                'plaidConnect' => (in_array('connect', $extraInfo['products'])) ? true : false,
+                'plaidIncome' => (in_array('income', $extraInfo['products'])) ? true : false,
+                'plaidInfo' => (in_array('info', $extraInfo['products'])) ? true : false,
+                'plaidRisk' => (in_array('risk', $extraInfo['products'])) ? true : false,
+            ]);
+        });
+
+        if($this->authable($type)) {
+            $authData = Plaid::getAuthData($token);
+            $updatedAcct = collect($authData['accounts'])->each(function($acct) {
+                $account = config('plaid.accountModel')::where('accountId', $acct['_id'])->first();
+                $account->accountNumber = $acct['numbers']['account'] ?? null;
+                $account->routingNumber = $acct['numbers']['routing'] ?? null;
+                $account->save();
+            });
+        }
+
     }
 
     protected function needsMfa($reply)

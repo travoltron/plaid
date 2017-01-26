@@ -874,6 +874,16 @@ class Plaid
         }
     }
 
+    public static function searchId($institution_id)
+    {
+        try {
+            $request = self::client()->get('institutions/all/'.$institution_id);
+            return json_decode($request->getBody(), true);
+        } catch (RequestException $e) {
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
+        }
+    }
+
     public static function searchType($product)
     {
         try {
@@ -916,7 +926,7 @@ class Plaid
         try {
             $request = self::client()->post('creditdetails/get', [
                 'json' => [
-                    'client_id' => config('plaid.client-id'),
+                    'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
                     'access_token' => $access_token,
                 ]
