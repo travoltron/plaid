@@ -5,11 +5,11 @@
  */
 
 return [
-    'baseUrl' => (env('APP_ENV') !== 'production'?'https://tartan.plaid.com/':'https://api.plaid.com/'),
-    'client_id' => (env('APP_ENV') !== 'production'?'test_id':env('PLAID_CLIENT_ID')),
-    'secret' => (env('APP_ENV') !== 'production'?'test_secret':env('PLAID_SECRET')),
+    'baseUrl' => (env('APP_ENV') !== 'production') ? 'https://tartan.plaid.com/':'https://api.plaid.com/',
+    'client_id' => (env('APP_ENV') !== 'production') ? 'test_id':env('PLAID_CLIENT_ID'),
+    'secret' => (env('APP_ENV') !== 'production') ? 'test_secret':env('PLAID_SECRET'),
     'prefix' => 'plaid',
-    'webhook' => (env('APP_ENV') === 'local'?'http://requestb.in/1dm3d8e1':route('plaidObserver')),
+    'webhook' => (env('APP_ENV') === 'local') ? 'http://requestb.in/1dm3d8e1': 'http://requestb.in/1dm3d8e1',
     'slackChannel' => '@ben', // change this to whatever works for you.
     'stripFakes' => true, // this will remove the 'fake_institution' from being resolved in saving the accounts
     'autoupgrade' => true,
