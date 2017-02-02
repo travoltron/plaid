@@ -43,10 +43,9 @@ class GetAccountsRequest extends FormRequest
 
     public function response(array $errors)
     {
-        return response()->json([
-            'status' => 400,
-            'data' => [],
-            'errors' => collect($errors)->flatten()->toArray()
-        ], 400);
+        $errors = collect($errors)->map(function($message) {
+            return $message[0];
+        });
+        return response()->api($errors, 400);
     }
 }
