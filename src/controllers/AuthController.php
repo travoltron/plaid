@@ -74,6 +74,9 @@ class AuthController extends BaseController
         if(!isset($accounts['accounts'])) {
             $accounts = Plaid::getConnectData($token);
         }
+        if(!isset($accounts['accounts'])) {
+            $accounts = Plaid::getAuthData($token);
+        }
 
         $extraInfo = (config('plaid.stripFakes')) ? collect(Plaid::searchId(str_replace('test_', '', $accounts['access_token'])))->toArray() : collect(Plaid::searchId($accounts['access_token']))->toArray();
         $search = collect(Plaid::search($extraInfo['name']));
@@ -111,7 +114,7 @@ class AuthController extends BaseController
         if($this->authable($type)) {
             $authData = Plaid::getAuthData($token);
             $updatedAcct = collect($authData['accounts'])->each(function($acct) {
-                $account = config('plaid.accountModel')::where('accountId', $acct['_id'])->first();
+                $account = config('plaid.accountModel')::firstOrNew(['accountId' => $acct['_id']]);
                 $account->accountNumber = $acct['numbers']['account'] ?? null;
                 $account->routingNumber = $acct['numbers']['routing'] ?? null;
                 $account->save();
