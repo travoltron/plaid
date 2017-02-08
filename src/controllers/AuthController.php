@@ -37,7 +37,8 @@ class AuthController extends BaseController
     {
         if($this->authable($request->input('type'))) {
             $auth = Plaid::authMfa($request->input('mfaCode'), $request->input('token'));
-        } else {
+        }
+        if(!$this->authable($request->input('type'))) {
             $auth = Plaid::connectMfa($request->input('mfaCode'), $request->input('token'));
         }
         if($this->needsMfa($auth)) {
@@ -70,12 +71,13 @@ class AuthController extends BaseController
     protected function storeAccounts(string $uuid, string $token, string $type)
     {
         $accounts = Plaid::creditDetails($token);
+        // Get auth data if this doesn't work
+        if(!isset($accounts['accounts'])) {
+            $accounts = Plaid::getAuthData($token);
+        }
         // Get connect data if this doesn't work
         if(!isset($accounts['accounts'])) {
             $accounts = Plaid::getConnectData($token);
-        }
-        if(!isset($accounts['accounts'])) {
-            $accounts = Plaid::getAuthData($token);
         }
 
         $extraInfo = (config('plaid.stripFakes')) ? collect(Plaid::searchId(str_replace('test_', '', $accounts['access_token'])))->toArray() : collect(Plaid::searchId($accounts['access_token']))->toArray();

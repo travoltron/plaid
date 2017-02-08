@@ -20,13 +20,13 @@ Route::group(['prefix' => config('plaid.prefix')], function() {
         Route::get('transactions', 'Travoltron\Plaid\Controllers\SpendingController@allTransactions');
         Route::get('recent', 'Travoltron\Plaid\Controllers\SpendingController@recentTransactions');
         // Accounts
-        Route::post('accounts', 'Travoltron\Plaid\Controllers\AccountController@getAccounts');
+        Route::get('accounts', 'Travoltron\Plaid\Controllers\AccountController@getAccounts');
         // Income
-        Route::post('income', 'Travoltron\Plaid\Controllers\AccountController@getIncome');
+        Route::get('income', 'Travoltron\Plaid\Controllers\AccountController@getIncome');
 
-        Route::post('info', 'Travoltron\Plaid\Controllers\AccountController@getInfo');
+        Route::get('info', 'Travoltron\Plaid\Controllers\AccountController@getInfo');
 
-        Route::post('risk', 'Travoltron\Plaid\Controllers\AccountController@getRisk');
+        Route::get('risk', 'Travoltron\Plaid\Controllers\AccountController@getRisk');
 
     });
 
