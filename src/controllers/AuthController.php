@@ -109,7 +109,7 @@ class AuthController extends BaseController
                 'institutionName' => $extraInfo['name'],
                 'logo' => $logo,
                 'accountName' => $account['meta']['name'],
-                'accountId' => (!app()->environment('production')) ? "$uuid_".$account['_id'] : $account['_id'],
+                'accountId' => (!app()->environment('production')) ? $uuid.'_'.$account['_id'] : $account['_id'],
                 'last4' => $account['meta']['number'],
                 'type' => ($account['type'] === 'depository') ? $account['subtype'] : $account['type'],
                 'accountNumber' => null,
