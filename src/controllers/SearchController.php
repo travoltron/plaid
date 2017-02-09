@@ -51,7 +51,7 @@ class SearchController extends BaseController
             'routingNumber' => 'required|digits:9'
         ]);
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 400);
+            return response()->api($validator->errors(), 400);
         }
         $routingName = json_decode((new \GuzzleHttp\Client)->request('GET', 'https://www.routingnumbers.info/api/name.json', [
             'decode_content' => true,
