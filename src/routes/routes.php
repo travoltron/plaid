@@ -14,6 +14,7 @@ Route::group(['prefix' => config('plaid.prefix')], function() {
         // Searching
         Route::post('name', 'Travoltron\Plaid\Controllers\SearchController@searchName');
         Route::post('product', 'Travoltron\Plaid\Controllers\SearchController@searchProduct');
+        Route::post('routing', 'Travoltron\Plaid\Controllers\SearchController@routingNumber');
     });
     Route::group(['prefix' => 'get'], function() {
         // Transactions

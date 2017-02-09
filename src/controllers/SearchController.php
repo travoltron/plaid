@@ -44,4 +44,25 @@ class SearchController extends BaseController
         $results = Plaid::searchType($request->input('type'));
         dd($results);
     }
+
+    public function routingNumber(Request $request)
+    {
+        $validator = \Validator::make($request->all(), [
+            'routingNumber' => 'required|digits:9'
+        ]);
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
+        $routingName = json_decode((new \GuzzleHttp\Client)->request('GET', 'https://www.routingnumbers.info/api/name.json', [
+            'decode_content' => true,
+            'query' => [
+                'rn' => $request->input('routingNumber')
+            ]
+        ])->getBody()->getContents(), true);
+        if($routingName['code'] === 404) {
+            return response()->api(['invalidRoutingNumber' => 'The routing number does not exist. Check again.'], 404);
+        }
+        return response()->api(['bankName' => $routingName['name']], 200);
+
+    }
 }
