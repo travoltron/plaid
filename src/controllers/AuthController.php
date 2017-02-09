@@ -31,7 +31,7 @@ class AuthController extends BaseController
         // Stash the token
         $this->storeToken($request->header('uuid'), $auth['access_token']);
         $this->storeAccounts($request->header('uuid'), $auth['access_token'], $request->input('type'));
-        return $this->successFormatter($auth);
+        return $this->successFormatter($request->header('uuid'));
     }
 
     public function mfaAccount(MfaAccountRequest $request)
@@ -53,7 +53,7 @@ class AuthController extends BaseController
         }
         $this->storeToken($request->header('uuid'), $auth['access_token']);
         $this->storeAccounts($request->header('uuid'), $auth['access_token'], $request->input('type'));
-        return $this->successFormatter($auth);
+        return $this->successFormatter($request->header('uuid'));
     }
 
     public function upgradeAccount(UpgradeAccountRequest $request)
@@ -67,11 +67,10 @@ class AuthController extends BaseController
         if($acct->accountNumber !== null || $acct->routingNumber !== null) {
             return response()->api(['message' => 'Account and routing numbers already set.'], 400);
         }
-        $acct->update([
-            $acct->accountNumber => $request->input('accountNumber'),
-            $acct->routingNumber => $request->input('routingNumber'),
-        ]);
-
+        $acct->accountNumber = $request->input('accountNumber');
+        $acct->routingNumber = $request->input('routingNumber');
+        $acct->save();
+        return $this->successFormatter($request->header('uuid'));
     }
 
     protected function storeToken(string $uuid, string $token)
@@ -129,8 +128,8 @@ class AuthController extends BaseController
 
         if($this->authable($type)) {
             $authData = Plaid::getAuthData($token);
-            $updatedAcct = collect($authData['accounts'])->each(function($acct) {
-                $account = config('plaid.accountModel')::firstOrNew(['accountId' => $acct['_id']]);
+            $updatedAcct = collect($authData['accounts'])->each(function($acct) use ($uuid) {
+                $account = (!app()->environment('production')) ? config('plaid.accountModel')::firstOrNew(['accountId' => $uuid.'_'.$acct['_id']]) : config('plaid.accountModel')::firstOrNew(['accountId' => $acct['_id']]);
                 $account->accountNumber = $acct['numbers']['account'] ?? null;
                 $account->routingNumber = $acct['numbers']['routing'] ?? null;
                 $account->save();
@@ -197,12 +196,29 @@ class AuthController extends BaseController
         ], config("plaid.code.$code.http"));
     }
 
-    protected function successFormatter($auth)
+    protected function successFormatter(string $uuid)
     {
-        return response()->json([
-            'status' => 200,
-            'data' => $auth,
-            'errors' => [],
-        ], 200);
+        $accounts = config('plaid.accountModel')::where('uuid', $uuid)->get()->map(function($account) {
+            return [
+                'accountId' => $account->accountId,
+                'balance' => [
+                    'current' => str_dollarsCents($account->balance)
+                ],
+                'name' => $account->institutionName,
+                'meta' => [
+                    'name' => $account->accountName,
+                    'number' => $account->last4
+                ],
+                'numbers' => [
+                    'routing' => $account->routingNumber,
+                    'account' => $account->accountNumber,
+                ],
+                'subtype' => ($account->type === 'checking' || $account->type === 'savings') ? $account->type : null,
+                'type' => ($account->type === 'checking' || $account->type === 'savings') ? 'depository' : $account->type
+            ];
+        });
+
+        return response()->api(['accounts' => $accounts], 200);
+
     }
 }
