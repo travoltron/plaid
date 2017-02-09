@@ -24,9 +24,9 @@ Route::group(['prefix' => config('plaid.prefix')], function() {
         Route::get('accounts', 'Travoltron\Plaid\Controllers\AccountController@getAccounts');
         // Income
         Route::get('income', 'Travoltron\Plaid\Controllers\AccountController@getIncome');
-
+        // Info
         Route::get('info', 'Travoltron\Plaid\Controllers\AccountController@getInfo');
-
+        // Risk
         Route::get('risk', 'Travoltron\Plaid\Controllers\AccountController@getRisk');
 
     });

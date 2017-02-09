@@ -8,6 +8,7 @@ use Illuminate\Routing\Controller as BaseController;
 use Travoltron\Plaid\Requests\Auth\AddAccountRequest;
 use Travoltron\Plaid\Requests\Auth\MfaAccountRequest;
 use Travoltron\Plaid\Requests\Auth\UpgradeAccountRequest;
+use Travoltron\Plaid\Requests\Auth\UpdateAccountRequest;
 
 class AuthController extends BaseController
 {
@@ -60,6 +61,19 @@ class AuthController extends BaseController
         $this->upgradeTo($request->input('products'), $request->input('token'));
     }
 
+    public function updateAccount(UpdateAccountRequest $request)
+    {
+        $acct = config('plaid.accountModel')::where('accountId', $request->input('accountId'))->first();
+        if($acct->accountNumber !== null || $acct->routingNumber !== null) {
+            return response()->api(['message' => 'Account and routing numbers already set.'], 400);
+        }
+        $acct->update([
+            $acct->accountNumber => $request->input('accountNumber'),
+            $acct->routingNumber => $request->input('routingNumber'),
+        ]);
+
+    }
+
     protected function storeToken(string $uuid, string $token)
     {
         $savedToken = config('plaid.tokenModel')::create([
@@ -95,7 +109,7 @@ class AuthController extends BaseController
                 'institutionName' => $extraInfo['name'],
                 'logo' => $logo,
                 'accountName' => $account['meta']['name'],
-                'accountId' => $account['_id'],
+                'accountId' => (!app()->environment('production')) ? "$uuid_".$account['_id'] : $account['_id'],
                 'last4' => $account['meta']['number'],
                 'type' => ($account['type'] === 'depository') ? $account['subtype'] : $account['type'],
                 'accountNumber' => null,
