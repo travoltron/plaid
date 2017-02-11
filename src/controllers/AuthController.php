@@ -117,7 +117,7 @@ class AuthController extends BaseController
                 'spendingLimit'   => $spendingLimit,
                 'apr'             => $apr,
                 'minimumPayment'  => $minimumPayment,
-                'batch'           => config('plaid.tokenModel')::where('uuid', $uuid)->count(),
+                'batch'           => config('plaid.tokenModel')::where('uuid', $uuid)->get()->count(),
                 'smartsave'       => false,
                 'plaidAuth'       => (in_array('auth', $extraInfo['products'])) ? true : false,
                 'plaidConnect'    => (in_array('connect', $extraInfo['products'])) ? true : false,
@@ -199,7 +199,9 @@ class AuthController extends BaseController
 
     protected function successFormatter(string $uuid)
     {
-        $accounts = config('plaid.accountModel')::where('uuid', $uuid)->get()->map(function($account) {
+        $accounts = config('plaid.accountModel')::where('uuid', $uuid)->get()->filter(function($account) use ($uuid) {
+            return $account->batch == config('plaid.tokenModel')::where('uuid', $uuid)->get()->count();
+        })->map(function($account) {
             return [
                 'accountId' => $account->accountId,
                 'balance' => [
