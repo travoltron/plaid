@@ -29,6 +29,7 @@ class CreatePlaidAccountsTable extends Migration
             $table->decimal('spendingLimit', 15, 2);
             $table->decimal('apr', 4, 2);
             $table->decimal('minimumPayment', 15, 2);
+            $table->integer('batch')->default(0);
             $table->boolean('smartsave')->index()->unsigned()->default(false);
             $table->boolean('plaidAuth')->default(false);
             $table->boolean('plaidConnect')->index()->unsigned()->default(false);

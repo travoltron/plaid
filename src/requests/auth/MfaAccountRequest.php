@@ -13,9 +13,6 @@ class MfaAccountRequest extends FormRequest
      */
     public function authorize()
     {
-        if(app()->environment('testing')) {
-            return true;
-        }
         if(!$this->header('uuid') || !\App\Models\User::uuid($this->header('uuid'))) {
             return false;
         }
@@ -51,5 +48,10 @@ class MfaAccountRequest extends FormRequest
             return $message[0];
         });
         return response()->api($errors, 400);
+    }
+
+    public function forbiddenResponse()
+    {
+        return response()->api(['uuid' => 'Invalid or missing UUID.'], 403);
     }
 }
