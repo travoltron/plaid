@@ -21,6 +21,7 @@ class PlaidAccount extends Model
         'spendingLimit',
         'apr',
         'minimumPayment',
+        'batch',
         'smartsave',
         'plaidAuth',
         'plaidConnect',

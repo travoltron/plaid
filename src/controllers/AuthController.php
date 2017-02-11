@@ -130,7 +130,7 @@ class AuthController extends BaseController
         if($this->authable($type)) {
             $authData = Plaid::getAuthData($token);
             $updatedAcct = collect($authData['accounts'])->each(function($acct) use ($uuid) {
-                $account = (!app()->environment('production')) ? config('plaid.accountModel')::firstOrNew(['accountId' => $uuid.'_'.$acct['_id']]) : config('plaid.accountModel')::firstOrNew(['accountId' => $acct['_id']]);
+                $account = (!app()->environment('production')) ? config('plaid.accountModel')::firstOrNew(['accountId' => $uuid.'_'.$acct['_id'], 'batch' => config('plaid.tokenModel')::where('uuid', $uuid)->get()->count()]) : config('plaid.accountModel')::firstOrNew(['accountId' => $acct['_id'], 'batch' => config('plaid.tokenModel')::where('uuid', $uuid)->get()->count()]);
                 $account->accountNumber = $acct['numbers']['account'] ?? null;
                 $account->routingNumber = $acct['numbers']['routing'] ?? null;
                 $account->save();
@@ -219,7 +219,7 @@ class AuthController extends BaseController
                 'subtype' => ($account->type === 'checking' || $account->type === 'savings') ? $account->type : null,
                 'type' => ($account->type === 'checking' || $account->type === 'savings') ? 'depository' : $account->type
             ];
-        });
+        })->values();
 
         return response()->api(['accounts' => $accounts], 200);
 
