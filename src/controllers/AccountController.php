@@ -10,8 +10,9 @@ use Travoltron\Plaid\Requests\Accounts\GetAccountsRequest;
 
 class AccountController extends BaseController
 {
-    public function getIncome(GetIncomeRequest $request)
+    public function getIncome(Request $request)
     {
+        dd($request->header('uuid'));
         $income = Plaid::getIncomeData($request->input('token'));
         if($this->hasError($income)) {
             return $this->hasError($income);
@@ -21,7 +22,7 @@ class AccountController extends BaseController
         }
     }
 
-    public function getInfo(GetIncomeRequest $request)
+    public function getInfo(Request $request)
     {
         $info = Plaid::getInfoData($request->input('token'));
         if($this->hasError($info)) {
@@ -32,10 +33,9 @@ class AccountController extends BaseController
         }
     }
 
-    public function getRisk(GetIncomeRequest $request)
+    public function getRisk(Request $request)
     {
         $risk = Plaid::getRiskData($request->input('token'));
-
         if($this->hasError($risk)) {
             return $this->hasError($risk);
         }

@@ -8,6 +8,7 @@ class PlaidAccount extends Model
 {
     protected $fillable = [
         'uuid',
+        'token',
         'institutionName',
         'debtHash',
         'logo',

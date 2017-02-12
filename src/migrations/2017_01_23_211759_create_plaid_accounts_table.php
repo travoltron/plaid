@@ -16,6 +16,7 @@ class CreatePlaidAccountsTable extends Migration
         Schema::create('plaid_accounts', function (Blueprint $table) {
             $table->increments('id');
             $table->uuid('uuid')->index()->unsigned();
+            $table->string('token');
             $table->string('institutionName');
             $table->string('debtHash')->nullable();
             $table->text('logo')->nullable();

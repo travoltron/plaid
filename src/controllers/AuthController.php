@@ -17,7 +17,7 @@ class AuthController extends BaseController
         if($this->authable($request->input('type'))) {
             $auth = Plaid::addAuthUser($request->input('username'), $request->input('password'), $request->input('pin', null), $request->input('type'));
         } else {
-            $auth = Plaid::addConnectUser($request->input('username'), $request->input('password'), $request->input('pin', null), $request->input('type'), config('plaid.webhook'));
+            $auth = Plaid::addConnectUser($request->input('username'), $request->input('password'), $request->input('pin', null), $request->input('type'), null);
         }
         if($this->needsMfa($auth)) {
             return $this->needsMfa($auth);
@@ -99,12 +99,13 @@ class AuthController extends BaseController
             return $bank['name'] === $extraInfo['name'];
         });
         $logo = $search->toArray()[$lookup]['logo'];
-        $savedAccounts = collect($accounts['accounts'])->each(function($account) use ($uuid, $extraInfo, $logo) {
+        $savedAccounts = collect($accounts['accounts'])->each(function($account) use ($uuid, $extraInfo, $logo, $token) {
             $spendingLimit = $account['meta']['limit'] ?? 0.00;
             $apr =  array_key_exists('creditDetails', $account['meta']) ? $account['meta']['creditDetails']['aprs']['purchases']['apr'] * 100 : 0.00;
             $minimumPayment = ($account['meta']['creditDetails']['minimumPaymentAmount'] ?? 0.00);
             config('plaid.accountModel')::create([
                 'uuid'            => $uuid,
+                'token'           => $token,
                 'institutionName' => $extraInfo['name'],
                 'logo'            => $logo,
                 'accountName'     => $account['meta']['name'],
@@ -130,9 +131,17 @@ class AuthController extends BaseController
         if($this->authable($type)) {
             $authData = Plaid::getAuthData($token);
             $updatedAcct = collect($authData['accounts'])->each(function($acct) use ($uuid) {
-                $account = (!app()->environment('production')) ? config('plaid.accountModel')::firstOrNew(['accountId' => $uuid.'_'.$acct['_id'], 'batch' => config('plaid.tokenModel')::where('uuid', $uuid)->get()->count()]) : config('plaid.accountModel')::firstOrNew(['accountId' => $acct['_id'], 'batch' => config('plaid.tokenModel')::where('uuid', $uuid)->get()->count()]);
-                $account->accountNumber = $acct['numbers']['account'] ?? null;
-                $account->routingNumber = $acct['numbers']['routing'] ?? null;
+                $account = (!app()->environment('production')) ?
+                    config('plaid.accountModel')::firstOrNew([
+                        'accountId' => $uuid.'_'.$acct['_id'],
+                        'batch' => config('plaid.tokenModel')::where('uuid', $uuid)->get()->count()
+                    ]) :
+                    config('plaid.accountModel')::firstOrNew([
+                        'accountId' => $acct['_id'],
+                        'batch' => config('plaid.tokenModel')::where('uuid', $uuid)->get()->count()
+                    ]);
+                $account->accountNumber = (isset($acct['numbers']['account'])) ? $acct['numbers']['account'] : null;
+                $account->routingNumber = (isset($acct['numbers']['routing'])) ? $acct['numbers']['routing'] : null;
                 $account->save();
             });
         }
@@ -177,7 +186,8 @@ class AuthController extends BaseController
         $products = collect($product);
         if($products->contains('all')) {
             $upgrade = collect($all)->map(function($product) use ($token) {
-                return Plaid::upgrade($token, $product, config('plaid.webhook'));
+                $webhook = ($product === 'connect') ? config('plaid.webhook') : null;
+                return Plaid::upgrade($token, $product, $webhook);
             });
         }
         if(!$products->contains('all')) {
