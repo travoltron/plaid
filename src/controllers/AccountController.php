@@ -12,85 +12,97 @@ class AccountController extends BaseController
 {
     public function getIncome(Request $request)
     {
-        dd($request->header('uuid'));
-        $income = Plaid::getIncomeData($request->input('token'));
-        if($this->hasError($income)) {
-            return $this->hasError($income);
-        }
-        if(!collect($income)->isEmpty()) {
-            return $this->successFormatter(['income' => $income['income']]);
-        }
+        $incomeTokens = $this->isSkillable($request->header('uuid'), 'income');
+        $income = collect($incomeTokens)->map(function($token) {
+            return Plaid::getIncomeData($token)['income'];
+        });
+
+        return $this->successFormatter(['income' => $income]);
     }
 
     public function getInfo(Request $request)
     {
-        $info = Plaid::getInfoData($request->input('token'));
-        if($this->hasError($info)) {
-            return $this->hasError($info);
-        }
-        if(!collect($info)->isEmpty()) {
-            return $this->successFormatter(['info' => $info['info']]);
-        }
+        $infoTokens = $this->isSkillable($request->header('uuid'), 'info');
+        $info = collect($infoTokens)->map(function($token) {
+            return Plaid::getInfoData($token)['info'];
+        });
+
+        return $this->successFormatter(['info' => $info]);
     }
 
     public function getRisk(Request $request)
     {
-        $risk = Plaid::getRiskData($request->input('token'));
-        if($this->hasError($risk)) {
-            return $this->hasError($risk);
-        }
-        if(!$lookup->isEmpty()) {
-            return $this->successFormatter(['risk' => $risk['risk']]);
-        }
-    }
-
-    public function getAccounts(GetAccountsRequest $request)
-    {
-        $lookup = Plaid::getAuthData($request->input('token'));
-        if($this->hasError($lookup)) {
-            $lookup = Plaid::getConnectData($request->input('token'));
-        }
-        // Run twice to account for Connect lookup failing also
-        if($this->hasError($lookup)) {
-            // return $this->errorFormatter($lookup['code']);
-        }
-        $accounts = collect($lookup['accounts']);
-
-        if($request->input('scope') === 'all') {
-            if(!$accounts->isEmpty()) {
-                return $this->successFormatter(['accounts' => $this->formatter($accounts)]);
-            } else {
-                return $this->errorFormatter('1610');
-            }
-        }
-        return $this->successFormatter(['accounts' => $this->typeFilter($accounts, $request->input('scope'))]);
-    }
-
-    protected function typeFilter(\Illuminate\Support\Collection $accounts, $type)
-    {
-        $filtered = $accounts->filter(function($acct) use ($type) {
-            if($acct['type'] === 'depository') {
-                return $acct['subtype'] === $type;
-            }
-            return $acct['type'] === $type;
-        })->values();
-
-        return $this->formatter($filtered);
-    }
-
-    protected function formatter(\Illuminate\Support\Collection $response)
-    {
-        if($response->isEmpty()) {
-            return $this->errorFormatter('1610');
-        }
-        return $response->map(function($acct) {
-            return [
-                'name' => $acct['institution_type'],
-                'balance' => $acct['balance'],
-                'type' => ($acct['type'] === 'depository')?$acct['subtype']:$acct['type'],
-                'meta' => $acct['meta']
-            ];
+        $riskTokens = $this->isSkillable($request->header('uuid'), 'risk');
+        $risk = collect($riskTokens)->map(function($token) {
+            return Plaid::getRiskData($token);
         });
+
+        return $this->successFormatter(['risk' => $risk]);
+    }
+
+    protected function isSkillable(string $uuid, string $skill)
+    {
+        switch ($skill) {
+            case 'income':
+                return config('plaid.accountModel')::where('uuid', $uuid)
+                    ->where('plaidIncome', '1')->get()->map(function($account) {
+                        return $account->token;
+                    })->unique()->values()->toArray();
+                break;
+            case 'risk':
+                return config('plaid.accountModel')::where('uuid', $uuid)
+                    ->where('plaidRisk', '1')->get()->map(function($account) {
+                        return $account->token;
+                    })->unique()->values()->toArray();
+                break;
+            case 'info':
+                return config('plaid.accountModel')::where('uuid', $uuid)
+                    ->where('plaidInfo', '1')->get()->map(function($account) {
+                        return $account->token;
+                    })->unique()->values()->toArray();
+                break;
+            case 'auth':
+                return config('plaid.accountModel')::where('uuid', $uuid)
+                    ->where('plaidAuth', '1')->get()->map(function($account) {
+                        return $account->token;
+                    })->unique()->values()->toArray();
+                break;
+            case 'connect':
+                return config('plaid.accountModel')::where('uuid', $uuid)
+                    ->where('plaidConnect', '1')->get()->map(function($account) {
+                        return $account->token;
+                    })->unique()->values()->toArray();
+                break;
+            default:
+                return;
+                break;
+        }
+
+    }
+
+
+    public function getAccounts(Request $request)
+    {
+        return config('plaid.accountModel')::where('uuid', $request->header('uuid'))->get()
+            ->map(function($account) {
+            return [
+                'accountId' => $account->accountId,
+                'balance' => [
+                    'current' => str_dollarsCents($account->balance)
+                ],
+                'name' => $account->institutionName,
+                'meta' => [
+                    'name' => $account->accountName,
+                    'number' => $account->last4
+                ],
+                'numbers' => [
+                    'routing' => $account->routingNumber,
+                    'account' => $account->accountNumber,
+                ],
+                'subtype' => ($account->type === 'checking' || $account->type === 'savings') ? $account->type : null,
+                'type' => ($account->type === 'checking' || $account->type === 'savings') ? 'depository' : $account->type
+            ];
+        })->values();
     }
 
     protected function authable($type)
@@ -124,10 +136,6 @@ class AccountController extends BaseController
 
     protected function successFormatter($reply)
     {
-        return response()->json([
-            'status' => 200,
-            'data' => $reply,
-            'errors' => [],
-        ], 200);
+        return response()->api($reply, 200);
     }
 }
