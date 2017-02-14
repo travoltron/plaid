@@ -8,6 +8,10 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class PlaidTest extends TestCase
 {
+
+    use DatabaseMigrations;
+    use DatabaseTransactions;
+
     public function testContactPlaid()
     {
         $categories = Plaid::categories();
@@ -16,11 +20,16 @@ class PlaidTest extends TestCase
 
     public function testAddAuthNoMfa()
     {
-         $this->json('POST', '/plaid/account/add',
+        $this->artisan('migrate:refresh');
+        $this->artisan('db:seed');
+        $this->json('POST', '/plaid/account/add',
             [
                 'username' => 'plaid_test',
                 'password' => 'plaid_good',
                 'type' => 'wells'
+            ],
+            [
+                'uuid' => '1234567890'
             ])->seeJson([
                 'status' => 200,
             ]);
@@ -33,6 +42,9 @@ class PlaidTest extends TestCase
                 'username' => 'plaid_test',
                 'password' => 'plaid_good',
                 'type' => 'chase'
+            ],
+            [
+                'uuid' => '1234567890'
             ])->seeJsonStructure([
                 'data' => [
                     'mfa'
@@ -47,6 +59,9 @@ class PlaidTest extends TestCase
                 'username' => 'plaid_test',
                 'password' => 'bad_password',
                 'type' => 'chase'
+            ],
+            [
+                'uuid' => '1234567890'
             ])->seeJsonEquals([
                 'data' => [],
                 'errors' => [
@@ -58,18 +73,25 @@ class PlaidTest extends TestCase
 
     public function testCompletedMfaAuth()
     {
-        // Initialize the stub account
+        $this->artisan('migrate:refresh');
+        $this->artisan('db:seed');
         $this->json('POST', '/plaid/account/add',
             [
                 'username' => 'plaid_test',
                 'password' => 'plaid_good',
                 'type' => 'chase'
+            ],
+            [
+                'uuid' => '1234567890'
             ]);
         $this->json('POST', '/plaid/account/mfa',
             [
                 'mfaCode' => '1234',
                 'token' => 'test_chase',
                 'type' => 'chase'
+            ],
+            [
+                'uuid' => '1234567890'
             ])->seeJson([
                 'status' => 200,
             ]);
@@ -77,18 +99,25 @@ class PlaidTest extends TestCase
 
     public function testRepeatedMfaAuth()
     {
-        // Initialize the stub account
+        $this->artisan('migrate:refresh');
+        $this->artisan('db:seed');
         $this->json('POST', '/plaid/account/add',
             [
                 'username' => 'plaid_test',
                 'password' => 'plaid_good',
                 'type' => 'bofa'
+            ],
+            [
+                'uuid' => '1234567890'
             ]);
         $this->json('POST', '/plaid/account/mfa',
             [
                 'mfaCode' => 'again',
                 'token' => 'test_bofa',
                 'type' => 'bofa'
+            ],
+            [
+                'uuid' => '1234567890'
             ])->seeJson([
                 'status' => 201,
             ]);
@@ -96,18 +125,25 @@ class PlaidTest extends TestCase
 
     public function testBadMfaAuth()
     {
-        // Initialize the stub account
+        $this->artisan('migrate:refresh');
+        $this->artisan('db:seed');
         $this->json('POST', '/plaid/account/add',
             [
                 'username' => 'plaid_test',
                 'password' => 'plaid_good',
                 'type' => 'chase'
+            ],
+            [
+                'uuid' => '1234567890'
             ]);
         $this->json('POST', '/plaid/account/mfa',
             [
                 'mfaCode' => 'wrong',
                 'token' => 'test_chase',
                 'type' => 'chase'
+            ],
+            [
+                'uuid' => '1234567890'
             ])->seeJsonEquals([
                 'data' => [],
                 'errors' => [
@@ -116,6 +152,5 @@ class PlaidTest extends TestCase
                 'status' => 402
              ]);
     }
-
 
 }
