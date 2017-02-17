@@ -40,25 +40,51 @@ class UpdateBalances extends Command
     {
         $accounts = collect(config('plaid.accountModel')::all());
         $oldAverage = $accounts->avg('balance');
-        $accounts->each(function($account) {
-            $data = Plaid::getConnectData($account->token);
-            dd($data);
+        $tokens = collect(config('plaid.tokenModel')::all())->unique('token');
+        $tokens->each(function($token) {
+            $accessToken = $token->token;
+            $uuid = $token->uuid;
+            collect(Plaid::getConnectData($accessToken)['accounts'])->each(function($account) use ($accessToken, $uuid) {
+                $accountId = (starts_with($accessToken, 'test_')) ? $uuid.'_'.$account['_id'] : $account['_id'];
+                config('plaid.accountModel')::where('accountId', $accountId)->update(['balance' => $account['balance']['current']]);
+                if(config('plaid.accountModel')::where('accountId', $accountId)->where('uuid', $uuid)->first()->smartsave && class_exists(\App\Models\SmartsaveBalance::class)) {
+                    $saved = \App\Models\SmartsaveBalance::create([
+                        'uuid' => $uuid,
+                        'balance' => $account['balance']['available'] ?? $account['balance']['current'] // failover to current balance if available (pending) isn't defined
+                    ]);
+                }
+            });
         });
         $newAverage = collect(config('plaid.accountModel')::all())->avg('balance');
-
+        $common = config('plaid.accountModel')::all()->unique('institutionName')->pluck('institutionName')->map(function($name) {
+            return [
+                'name' => $name,
+                'accounts' => config('plaid.accountModel')::where('institutionName', $name)->count()
+            ];
+        })->sortByDesc('accounts')->shift();
         \Slack::to('@ben')->attach([
             'fallback' => 'Updating Plaid balances',
             'color' => '#36a64f',
             'author_name' => 'Updating Plaid balances',
             'fields' => [
                 [
+                    'title' => 'Total number of linked accounts',
+                    'value' => config('plaid.accountModel')::all()->count(),
+                    'short' => true
+                ],
+                [
+                    'title' => 'Most common bank',
+                    'value' => $common['name'].': '.$common['accounts'].' accounts',
+                    'short' => true
+                ],
+                [
                     'title' => 'Average account balance (yesterday)',
-                    'value' => $oldAverage,
+                    'value' => str_dollarsCents($oldAverage),
                     'short' => true
                 ],
                 [
                     'title' => 'Average account balance (today)',
-                    'value' => $newAverage,
+                    'value' => str_dollarsCents($newAverage),
                     'short' => true
                 ],
             ],
