@@ -26,7 +26,13 @@ class PlaidServiceProvider extends ServiceProvider
         // Publish tests to be run as part of parent install
         $this->publishes([
             __DIR__.'/../tests/PlaidTest.php' => base_path('tests/PlaidTest.php')], 'tests');
+        // Commands
+        $this->commands($this->commands);
     }
+
+    protected $commands = [
+        \Travoltron\Plaid\Commands\UpdateBalances::class,
+    ];
 
     /**
      * Register any package services.
