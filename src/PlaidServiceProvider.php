@@ -31,7 +31,7 @@ class PlaidServiceProvider extends ServiceProvider
     }
 
     protected $commands = [
-        \Travoltron\Plaid\Commands\UpdateBalances::class,
+        commands\UpdateBalances::class,
     ];
 
     /**

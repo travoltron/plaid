@@ -56,7 +56,7 @@ class UpdateBalances extends Command
             });
         });
         $newAverage = collect(config('plaid.accountModel')::all())->avg('balance');
-        $common = config('plaid.accountModel')::all()->unique('institutionName')->pluck('institutionName')->map(function($name) {
+        $popular = config('plaid.accountModel')::all()->unique('institutionName')->pluck('institutionName')->map(function($name) {
             return [
                 'name' => $name,
                 'accounts' => config('plaid.accountModel')::where('institutionName', $name)->count()
@@ -74,7 +74,7 @@ class UpdateBalances extends Command
                 ],
                 [
                     'title' => 'Most common bank',
-                    'value' => $common['name'].': '.$common['accounts'].' accounts',
+                    'value' => $popular['name'].': '.$popular['accounts'].' accounts',
                     'short' => true
                 ],
                 [
