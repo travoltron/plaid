@@ -30,7 +30,8 @@ class AuthController extends BaseController
         }
         // Stash the token
         $this->storeToken($request->header('uuid'), $auth['access_token']);
-        $this->storeAccounts($request->header('uuid'), $auth['access_token'], $request->input('type'));
+        // Store the accounts
+        $this->storeAccounts($request->header('uuid'), $auth, $request->input('type'));
         return $this->successFormatter($request->header('uuid'));
     }
 
@@ -52,7 +53,7 @@ class AuthController extends BaseController
             $this->upgradeTo(['all'], $auth['access_token']);
         }
         $this->storeToken($request->header('uuid'), $auth['access_token']);
-        $this->storeAccounts($request->header('uuid'), $auth['access_token'], $request->input('type'));
+        $this->storeAccounts($request->header('uuid'), $auth, $request->input('type'));
         return $this->successFormatter($request->header('uuid'));
     }
 
@@ -83,44 +84,32 @@ class AuthController extends BaseController
         ]);
     }
 
-    protected function storeAccounts(string $uuid, string $token, string $type)
+    protected function storeAccounts(string $uuid, $data, string $type)
     {
-        $accounts = Plaid::creditDetails($token);
-        // Get auth data if this doesn't work
-        if(!isset($accounts['accounts'])) {
-            $accounts = Plaid::getAuthData($token);
-        }
-        // Get connect data if this doesn't work
-        if(!isset($accounts['accounts'])) {
-            $accounts = Plaid::getConnectData($token);
-        }
-
-        $extraInfo = (config('plaid.stripFakes')) ? collect(Plaid::searchId(str_replace('test_', '', $accounts['access_token'])))->toArray() : collect(Plaid::searchId($accounts['access_token']))->toArray();
+        $batch = config('plaid.tokenModel')::where('uuid', $uuid)->get()->count();
+        $extraInfo = (config('plaid.stripFakes')) ? collect(Plaid::searchId(str_replace('test_', '', $data['access_token'])))->toArray() : collect(Plaid::searchId($data['access_token']))->toArray();
         $search = collect(Plaid::search($extraInfo['name']));
         $lookup = $search->search(function($bank) use ($extraInfo) {
             return $bank['name'] === $extraInfo['name'];
         });
         $logo = $search->toArray()[$lookup]['logo'];
-        $savedAccounts = collect($accounts['accounts'])->each(function($account) use ($uuid, $extraInfo, $logo, $token) {
-            $spendingLimit = $account['meta']['limit'] ?? 0.00;
-            $apr =  array_key_exists('creditDetails', $account['meta']) ? $account['meta']['creditDetails']['aprs']['purchases']['apr'] * 100 : 0.00;
-            $minimumPayment = ($account['meta']['creditDetails']['minimumPaymentAmount'] ?? 0.00);
+        $savedAccounts = collect($data['accounts'])->each(function($account) use ($uuid, $extraInfo, $logo, $data, $batch) {
             config('plaid.accountModel')::create([
                 'uuid'            => $uuid,
-                'token'           => $token,
+                'token'           => $data['access_token'],
                 'institutionName' => $extraInfo['name'],
                 'logo'            => $logo,
                 'accountName'     => $account['meta']['name'],
                 'accountId'       => (!app()->environment('production')) ? $uuid.'_'.$account['_id'] : $account['_id'],
                 'last4'           => $account['meta']['number'],
                 'type'            => ($account['type'] === 'depository') ? $account['subtype'] : $account['type'],
-                'accountNumber'   => null,
-                'routingNumber'   => null,
+                'accountNumber'   => $account['numbers']['account'] ?? null,
+                'routingNumber'   => $account['numbers']['routing'] ?? null,
                 'balance'         => $account['balance']['current'],
-                'spendingLimit'   => $spendingLimit,
-                'apr'             => $apr,
-                'minimumPayment'  => $minimumPayment,
-                'batch'           => config('plaid.tokenModel')::where('uuid', $uuid)->get()->count(),
+                'spendingLimit'   => 0,
+                'apr'             => 0,
+                'minimumPayment'  => 0,
+                'batch'           => $batch,
                 'smartsave'       => false,
                 'plaidAuth'       => (in_array('auth', $extraInfo['products'])) ? true : false,
                 'plaidConnect'    => (in_array('connect', $extraInfo['products'])) ? true : false,
@@ -130,24 +119,28 @@ class AuthController extends BaseController
             ]);
         });
 
-        if($this->authable($type)) {
-            $authData = Plaid::getAuthData($token);
-            $updatedAcct = collect($authData['accounts'])->each(function($acct) use ($uuid) {
+        $creditDetails = Plaid::creditDetails($data['access_token']);
+        if (isset($creditDetails['accounts'])) {
+            collect($creditDetails['accounts'])->each(function($account) use ($uuid, $batch) {
+                $spendingLimit = $account['meta']['limit'] ?? 0.00;
+                $apr =  array_key_exists('creditDetails', $account['meta']) ? $account['meta']['creditDetails']['aprs']['purchases']['apr'] * 100 : 0.00;
+                $minimumPayment = ($account['meta']['creditDetails']['minimumPaymentAmount'] ?? 0.00);
                 $account = (!app()->environment('production')) ?
                     config('plaid.accountModel')::firstOrNew([
-                        'accountId' => $uuid.'_'.$acct['_id'],
-                        'batch' => config('plaid.tokenModel')::where('uuid', $uuid)->get()->count()
+                        'accountId' => $uuid.'_'.$account['_id'],
+                        'batch' => $batch
                     ]) :
                     config('plaid.accountModel')::firstOrNew([
-                        'accountId' => $acct['_id'],
-                        'batch' => config('plaid.tokenModel')::where('uuid', $uuid)->get()->count()
+                        'accountId' => $account['_id'],
+                        'batch' => $batch
                     ]);
-                $account->accountNumber = (isset($acct['numbers']['account'])) ? $acct['numbers']['account'] : null;
-                $account->routingNumber = (isset($acct['numbers']['routing'])) ? $acct['numbers']['routing'] : null;
+                $account->spendingLimit  = $spendingLimit;
+                $account->apr            = $apr;
+                $account->minimumPayment = $minimumPayment;
                 $account->save();
+
             });
         }
-
     }
 
     protected function needsMfa($reply)
