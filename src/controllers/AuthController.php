@@ -69,6 +69,8 @@ class AuthController extends BaseController
         }
         $acct->accountNumber = $request->input('accountNumber');
         $acct->routingNumber = $request->input('routingNumber');
+        // Since intent is being taken, we'll enable SmartSave here
+        $acct->smartsave = true;
         $acct->save();
         return $this->successFormatter($request->header('uuid'));
     }
