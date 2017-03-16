@@ -87,36 +87,37 @@ class AuthController extends BaseController
     protected function storeAccounts(string $uuid, $data, string $type)
     {
         $batch = config('plaid.tokenModel')::where('uuid', $uuid)->get()->count();
-        $extraInfo = (config('plaid.stripFakes')) ? collect(Plaid::searchId(str_replace('test_', '', $data['access_token'])))->toArray() : collect(Plaid::searchId($data['access_token']))->toArray();
+        $extraInfo = (config('plaid.stripFakes') && env('PLAID_STATUS') !== 'live') ? collect(Plaid::searchId(str_replace('test_', '', $data['access_token'])))->toArray() : collect(Plaid::searchId($data['accounts'][0]['institution_type']))->toArray();
         $search = collect(Plaid::search($extraInfo['name']));
         $lookup = $search->search(function($bank) use ($extraInfo) {
             return $bank['name'] === $extraInfo['name'];
         });
         $logo = $search->toArray()[$lookup]['logo'];
         $savedAccounts = collect($data['accounts'])->each(function($account) use ($uuid, $extraInfo, $logo, $data, $batch) {
-            config('plaid.accountModel')::create([
+            $savedAccount = config('plaid.accountModel')::firstOrNew([
                 'uuid'            => $uuid,
-                'token'           => $data['access_token'],
-                'institutionName' => $extraInfo['name'],
-                'logo'            => $logo,
-                'accountName'     => $account['meta']['name'],
-                'accountId'       => (!app()->environment('production')) ? $uuid.'_'.$account['_id'] : $account['_id'],
                 'last4'           => $account['meta']['number'],
-                'type'            => ($account['type'] === 'depository') ? $account['subtype'] : $account['type'],
+                'accountName'     => $account['meta']['name'],
                 'accountNumber'   => $account['numbers']['account'] ?? null,
                 'routingNumber'   => $account['numbers']['routing'] ?? null,
-                'balance'         => $account['balance']['current'],
-                'spendingLimit'   => 0,
-                'apr'             => 0,
-                'minimumPayment'  => 0,
-                'batch'           => $batch,
-                'smartsave'       => false,
-                'plaidAuth'       => (in_array('auth', $extraInfo['products'])) ? true : false,
-                'plaidConnect'    => (in_array('connect', $extraInfo['products'])) ? true : false,
-                'plaidIncome'     => (in_array('income', $extraInfo['products'])) ? true : false,
-                'plaidInfo'       => (in_array('info', $extraInfo['products'])) ? true : false,
-                'plaidRisk'       => (in_array('risk', $extraInfo['products'])) ? true : false,
             ]);
+            $savedAccount->token           = $data['access_token'];
+            $savedAccount->institutionName = $extraInfo['name'];
+            $savedAccount->logo            = $logo;
+            $savedAccount->accountId       = (env('PLAID_STATUS') !== 'live') ? $uuid.'_'.$account['_id'] : $account['_id'];
+            $savedAccount->type            = ($account['type'] === 'depository') ? $account['subtype'] : $account['type'];
+            $savedAccount->balance         = $account['balance']['current'];
+            $savedAccount->spendingLimit   = 0;
+            $savedAccount->apr             = 0;
+            $savedAccount->minimumPayment  = 0;
+            $savedAccount->batch           = $batch;
+            $savedAccount->smartsave       = false;
+            $savedAccount->plaidAuth       = (in_array('auth', $extraInfo['products'])) ? true : false;
+            $savedAccount->plaidConnect    = (in_array('connect', $extraInfo['products'])) ? true : false;
+            $savedAccount->plaidIncome     = (in_array('income', $extraInfo['products'])) ? true : false;
+            $savedAccount->plaidInfo       = (in_array('info', $extraInfo['products'])) ? true : false;
+            $savedAccount->plaidRisk       = (in_array('risk', $extraInfo['products'])) ? true : false;
+            $savedAccount->save();
         });
 
         $creditDetails = Plaid::creditDetails($data['access_token']);
@@ -125,7 +126,7 @@ class AuthController extends BaseController
                 $spendingLimit = $account['meta']['limit'] ?? 0.00;
                 $apr =  array_key_exists('creditDetails', $account['meta']) ? $account['meta']['creditDetails']['aprs']['purchases']['apr'] * 100 : 0.00;
                 $minimumPayment = ($account['meta']['creditDetails']['minimumPaymentAmount'] ?? 0.00);
-                $account = (!app()->environment('production')) ?
+                $account = (env('PLAID_STATUS') !== 'live') ?
                     config('plaid.accountModel')::firstOrNew([
                         'accountId' => $uuid.'_'.$account['_id'],
                         'batch' => $batch
