@@ -85,24 +85,25 @@ class AccountController extends BaseController
     {
         return config('plaid.accountModel')::where('uuid', $request->header('uuid'))->get()
             ->map(function($account) {
-            return [
-                'accountId' => $account->accountId,
-                'balance' => [
-                    'current' => str_dollarsCents($account->balance)
-                ],
-                'name' => $account->institutionName,
-                'meta' => [
-                    'name' => $account->accountName,
-                    'number' => $account->last4
-                ],
-                'numbers' => [
-                    'routing' => $account->routingNumber,
-                    'account' => $account->accountNumber,
-                ],
-                'subtype' => ($account->type === 'checking' || $account->type === 'savings') ? $account->type : null,
-                'type' => ($account->type === 'checking' || $account->type === 'savings') ? 'depository' : $account->type
-            ];
-        })->values();
+                return [
+                    'accountId' => $account->accountId,
+                    'balance' => [
+                        'current' => str_dollarsCents($account->balance)
+                    ],
+                    'name' => $account->institutionName,
+                    'meta' => [
+                        'name' => $account->accountName,
+                        'number' => $account->last4
+                    ],
+                    'numbers' => [
+                        'routing' => $account->routingNumber,
+                        'account' => $account->accountNumber,
+                    ],
+                    'subtype' => ($account->type === 'checking' || $account->type === 'savings') ? $account->type : null,
+                    'type' => ($account->type === 'checking' || $account->type === 'savings') ? 'depository' : $account->type,
+                    'updatedAt' => $account->updated_at->diffForHuman(\Carbon\Carbon::now())
+                ];
+            })->values();
     }
 
     protected function authable($type)
