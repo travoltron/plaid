@@ -101,7 +101,7 @@ class AccountController extends BaseController
                     ],
                     'subtype' => ($account->type === 'checking' || $account->type === 'savings') ? $account->type : null,
                     'type' => ($account->type === 'checking' || $account->type === 'savings') ? 'depository' : $account->type,
-                    'updatedAt' => $account->updated_at->diffForHuman(\Carbon\Carbon::now())
+                    'updatedAt' => $account->updated_at->diffForHumans()
                 ];
             })->values();
     }
