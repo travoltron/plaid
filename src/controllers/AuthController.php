@@ -76,6 +76,11 @@ class AuthController extends BaseController
         return $this->successFormatter($request->header('uuid'));
     }
 
+    public function deleteAccount(Request $request)
+    {
+        //
+    }
+
     protected function storeToken(string $uuid, string $token)
     {
         $savedToken = config('plaid.tokenModel')::create([
