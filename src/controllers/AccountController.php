@@ -84,6 +84,9 @@ class AccountController extends BaseController
     public function getAccounts(Request $request)
     {
         return config('plaid.accountModel')::where('uuid', $request->header('uuid'))->get()
+            ->filter(function($account) {
+                return $account->smartsave == 1;
+            })
             ->map(function($account) {
                 return [
                     'accountId' => $account->accountId,

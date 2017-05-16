@@ -50,6 +50,7 @@ class UpdateBalances extends Command
                 if(config('plaid.accountModel')::where('accountId', $accountId)->where('uuid', $uuid)->first()->smartsave && class_exists(\App\Models\SmartsaveBalance::class)) {
                     $saved = \App\Models\SmartsaveBalance::create([
                         'uuid' => $uuid,
+                        'accountId' => $accountId,
                         'balance' => $account['balance']['available'] ?? $account['balance']['current'] // failover to current balance if available (pending) isn't defined
                     ]);
                 }
