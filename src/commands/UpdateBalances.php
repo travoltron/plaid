@@ -47,8 +47,8 @@ class UpdateBalances extends Command
             collect(Plaid::getConnectData($accessToken)['accounts'])->each(function($account) use ($accessToken, $uuid) {
                 $accountId = (starts_with($accessToken, 'test_')) ? $uuid.'_'.$account['_id'] : $account['_id'];
                 config('plaid.accountModel')::where('accountId', $accountId)->update(['balance' => $account['balance']['current']]);
-                if(config('plaid.accountModel')::where('accountId', $accountId)->where('uuid', $uuid)->first()->smartsave && class_exists(\App\Models\SmartsaveBalance::class)) {
-                    $saved = \App\Models\SmartsaveBalance::create([
+                if(config('plaid.accountModel')::where('accountId', $accountId)->where('uuid', $uuid)->first()->smartsave && class_exists(\Investforward\Smartsave\Models\SmartsaveBalance::class)) {
+                    $saved = \Investforward\Smartsave\Models\SmartsaveBalance::create([
                         'uuid' => $uuid,
                         'accountId' => $accountId,
                         'balance' => $account['balance']['available'] ?? $account['balance']['current'] // failover to current balance if available (pending) isn't defined
