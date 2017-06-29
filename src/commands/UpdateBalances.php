@@ -44,10 +44,14 @@ class UpdateBalances extends Command
         $tokens->each(function($token) {
             $accessToken = $token->token;
             $uuid = $token->uuid;
-            collect(Plaid::getConnectData($accessToken)['accounts'])->each(function($account) use ($accessToken, $uuid) {
+            $accounts = Plaid::getConnectData($accessToken);
+            if (!isset($accounts['accounts'])) {
+                return;
+            }
+            collect($accounts['accounts'])->each(function($account) use ($accessToken, $uuid) {
                 $accountId = (starts_with($accessToken, 'test_')) ? $uuid.'_'.$account['_id'] : $account['_id'];
                 config('plaid.accountModel')::where('accountId', $accountId)->update(['balance' => $account['balance']['current']]);
-                if(config('plaid.accountModel')::where('accountId', $accountId)->where('uuid', $uuid)->first()->smartsave && class_exists(\Investforward\Smartsave\Models\SmartsaveBalance::class)) {
+                if(isset(config('plaid.accountModel')::where('accountId', $accountId)->where('uuid', $uuid)->first()->smartsave) && class_exists(\Investforward\Smartsave\Models\SmartsaveBalance::class)) {
                     $saved = \Investforward\Smartsave\Models\SmartsaveBalance::create([
                         'uuid' => $uuid,
                         'accountId' => $accountId,
