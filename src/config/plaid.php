@@ -13,6 +13,11 @@ return [
     'slackChannel' => '@ben', // change this to whatever works for you.
     'stripFakes' => true, // this will remove the 'fake_institution' from being resolved in saving the accounts
     'autoupgrade' => true,
+    'products' => [
+        'auth',
+        'connect',
+        'creditdetails'
+    ],
     'auth' => [
         'list' => false,
         'login_only' => true,

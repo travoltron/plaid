@@ -183,7 +183,7 @@ class AuthController extends BaseController
 
     protected function upgradeTo(array $product, $token)
     {
-        $all = ['auth', 'connect', 'creditdetails'];
+        $all = config('plaid.products');
         $products = collect($product);
         if($products->contains('all')) {
             $upgrade = collect($all)->map(function($product) use ($token) {
