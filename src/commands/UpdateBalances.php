@@ -50,7 +50,9 @@ class UpdateBalances extends Command
             }
             collect($accounts['accounts'])->each(function($account) use ($accessToken, $uuid) {
                 $accountId = (starts_with($accessToken, 'test_')) ? $uuid.'_'.$account['_id'] : $account['_id'];
-                config('plaid.accountModel')::where('accountId', $accountId)->update(['balance' => $account['balance']['current']]);
+                config('plaid.accountModel')::where('accountId', $accountId)->update([
+                    'balance' => (isset($account['balance']['current'])) ? $account['balance']['current'] : 0.00
+                ]);
                 if(isset(config('plaid.accountModel')::where('accountId', $accountId)->where('uuid', $uuid)->first()->smartsave) && class_exists(\Investforward\Smartsave\Models\SmartsaveBalance::class)) {
                     $saved = \Investforward\Smartsave\Models\SmartsaveBalance::create([
                         'uuid' => $uuid,

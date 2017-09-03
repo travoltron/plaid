@@ -12,6 +12,11 @@ class SearchController extends BaseController
 {
     public function searchName(SearchNameRequest $request)
     {
+        // Temporary Fix
+        if(strtolower($request->input('query')) == 'capital one 360') {
+            $request->merge(['query' => 'Capital One']);
+        }
+        // End temp fix
         $banks = collect(Plaid::search($request->input('query')));
         if(!$banks->isEmpty()) {
             $results = $banks->map(function($bank) {
