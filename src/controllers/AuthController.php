@@ -101,7 +101,7 @@ class AuthController extends BaseController
         $savedAccounts = collect($data['accounts'])->each(function($account) use ($uuid, $extraInfo, $logo, $data, $batch) {
             $savedAccount = config('plaid.accountModel')::firstOrNew([
                 'uuid'            => $uuid,
-                'last4'           => $account['meta']['number'],
+                'last4'           => $account['meta']['number'] ?? '0000',
                 'accountName'     => $account['meta']['name'],
                 'accountNumber'   => $account['numbers']['account'] ?? null,
                 'routingNumber'   => $account['numbers']['routing'] ?? null,
