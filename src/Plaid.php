@@ -874,6 +874,33 @@ class Plaid
         }
     }
 
+    public static function searchId($institution_id)
+    {
+        try {
+            $request = self::client()->get('institutions/all/'.$institution_id);
+            return json_decode($request->getBody(), true);
+        } catch (RequestException $e) {
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
+        }
+    }
+
+    public static function searchType($product)
+    {
+        try {
+            $request = self::client()->post('institutions/all', [
+                'json' => [
+                    'products' => '["'.$product.'"]',
+                    'client_id' => config('plaid.client_id', '547611a6d7d486893dab292a'),
+                    'secret' => config('plaid.secret', 'aDvuL4td9VdJzqhTqzwR5s'),
+                    'count' => 200
+                ]
+            ]);
+            return json_decode($request->getBody(), true);
+        } catch (RequestException $e) {
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
+        }
+    }
+
     ////////////////
     // Categories //
     ////////////////
@@ -887,6 +914,23 @@ class Plaid
         $endpoint = ($category_id)?'/'.$category_id:'';
         try {
             $request = self::client()->get('categories'.$endpoint);
+            return json_decode($request->getBody(), true);
+        } catch (RequestException $e) {
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
+        }
+    }
+
+
+    public static function creditDetails($access_token) {
+
+        try {
+            $request = self::client()->post('creditdetails/get', [
+                'json' => [
+                    'client_id' => config('plaid.client_id'),
+                    'secret' => config('plaid.secret'),
+                    'access_token' => $access_token,
+                ]
+            ]);
             return json_decode($request->getBody(), true);
         } catch (RequestException $e) {
             return json_decode($e->getResponse()->getBody()->getContents(), true);
