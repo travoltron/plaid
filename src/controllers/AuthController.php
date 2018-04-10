@@ -9,6 +9,7 @@ use Travoltron\Plaid\Requests\Auth\AddAccountRequest;
 use Travoltron\Plaid\Requests\Auth\MfaAccountRequest;
 use Travoltron\Plaid\Requests\Auth\UpgradeAccountRequest;
 use Travoltron\Plaid\Requests\Auth\UpdateAccountRequest;
+use Travoltron\Plaid\Requests\Auth\RelinkAccountRequest;
 
 class AuthController extends BaseController
 {
@@ -62,6 +63,46 @@ class AuthController extends BaseController
         $this->upgradeTo($request->input('products'), $request->input('token'));
     }
 
+    public function relinkAccount(RelinkAccountRequest $request)
+    {
+        $linkedAccount = config('plaid.accountModel')::where('uuid', $request->header('uuid'))->where('smartsave', true)->first();
+        $plaid_token = $linkedAccount->token ?? null;
+        $type = $linkedAccount->institutionName ?? null;
+        if(!$plaid_token) {
+            return response()->api(['token' => 'access_token is missing or damaged'], 400);
+        }
+        if($this->authable($type)) {
+            $relink = Plaid::updateAuthUser($request->input('username'), $request->input('password'), $request->input('pin', null), $plaid_token);
+        } else {
+            $relink = Plaid::updateConnectUser($request->input('username'), $request->input('password'), $request->input('pin', null), $plaid_token);
+        }
+
+        if($this->hasError($relink)) {
+            return $this->hasError($relink);
+        }
+    }
+
+    public function relinkMfaAccount(MfaAccountRequest $request)
+    {
+        $linkedAccount = config('plaid.accountModel')::where('uuid', $request->header('uuid'))->where('smartsave', true)->first();
+        $type = $linkedAccount->institutionName ?? null;
+
+        if($this->authable($type)) {
+            $auth = Plaid::relinkAuthMfa($request->input('mfaCode'), $request->input('token'));
+        }
+        if(!$this->authable($type)) {
+            $auth = Plaid::relinkConnectMfa($request->input('mfaCode'), $request->input('token'));
+        }
+        if($this->needsMfa($auth)) {
+            return $this->needsMfa($auth);
+        }
+        if($this->hasError($auth)) {
+            return $this->hasError($auth);
+        }
+
+        return $this->successFormatter($request->header('uuid'));
+    }
+
     public function updateAccount(UpdateAccountRequest $request)
     {
         $acct = config('plaid.accountModel')::where('accountId', $request->input('accountId'))->first();
@@ -76,14 +117,9 @@ class AuthController extends BaseController
         return $this->successFormatter($request->header('uuid'));
     }
 
-    public function deleteAccount(Request $request)
-    {
-        //
-    }
-
     protected function storeToken(string $uuid, string $token)
     {
-        $savedToken = config('plaid.tokenModel')::create([
+        config('plaid.tokenModel')::create([
             'uuid' => $uuid,
             'token' => $token
         ]);

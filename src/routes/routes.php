@@ -7,6 +7,8 @@ Route::group(['prefix' => config('plaid.prefix')], function() {
         Route::post('add', 'Travoltron\Plaid\Controllers\AuthController@addAccount');
         Route::post('mfa', 'Travoltron\Plaid\Controllers\AuthController@mfaAccount');
         Route::put('update', 'Travoltron\Plaid\Controllers\AuthController@updateAccount');
+        Route::post('relink', 'Travoltron\Plaid\Controllers\AuthController@relinkAccount');
+        Route::post('relinkMfa', 'Travoltron\Plaid\Controllers\AuthController@relinkMfaAccount');
         Route::put('upgrade', 'Travoltron\Plaid\Controllers\AuthController@upgradeAccount');
         Route::delete('delete', 'Travoltron\Plaid\Controllers\AuthController@deleteAccount');
     });

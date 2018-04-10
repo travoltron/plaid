@@ -80,6 +80,35 @@ class Plaid
     }
 
     /**
+     * [relinkAuthMfa description]
+     * @method relinkAuthMfa
+     * @param  [type]  $mfa         [description]
+     * @param  [type]  $plaid_token [description]
+     * @param  [type]  $method      [description]
+     * @return [type]               [description]
+     */
+    public static function relinkAuthMfa($mfa, $plaid_token, $method = null)
+    {
+        try {
+            $request = self::client()->patch('auth/step', [
+                'json' => [
+                    'client_id' => config('plaid.client_id'),
+                    'secret' => config('plaid.secret'),
+                    'mfa' => $mfa,
+                    'access_token' => $plaid_token,
+                    'options' => [
+                        'send_method' => $method,
+                        'login_only' => config('plaid.auth.login_only'),
+                    ]
+                ]
+            ]);
+            return json_decode($request->getBody(), true);
+        } catch (RequestException $e) {
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
+        }
+    }
+
+    /**
      * [getAuthData description]
      * @method getAuthData
      * @param  [type]      $plaid_token [description]
@@ -205,6 +234,34 @@ class Plaid
     {
         try {
             $request = self::client()->post('connect/step', [
+                'json' => [
+                    'client_id' => config('plaid.client_id'),
+                    'secret' => config('plaid.secret'),
+                    'mfa' => $mfa,
+                    'access_token' => $plaid_token,
+                    'options' => [
+                        'send_method' => $method
+                    ]
+                ]
+            ]);
+            return json_decode($request->getBody(), true);
+        } catch (RequestException $e) {
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
+        }
+    }
+
+    /**
+     * [relinkConnectMfa description]
+     * @method relinkConnectMfa
+     * @param  [type]     $mfa         [description]
+     * @param  [type]     $plaid_token [description]
+     * @param  [type]     $method      [description]
+     * @return [type]                  [description]
+     */
+    public static function relinkConnectMfa($mfa, $plaid_token, $method = null)
+    {
+        try {
+            $request = self::client()->patch('connect/step', [
                 'json' => [
                     'client_id' => config('plaid.client_id'),
                     'secret' => config('plaid.secret'),
