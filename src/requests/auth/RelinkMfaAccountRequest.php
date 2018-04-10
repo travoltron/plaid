@@ -4,7 +4,7 @@ namespace Travoltron\Plaid\Requests\Auth;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class MfaAccountRequest extends FormRequest
+class RelinkMfaAccountRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

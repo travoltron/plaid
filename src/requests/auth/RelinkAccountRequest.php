@@ -32,7 +32,6 @@ class RelinkAccountRequest extends FormRequest
         return [
             'username' => 'required',
             'password' => 'required',
-            'accessToken' => 'required'
         ];
     }
 
@@ -41,7 +40,7 @@ class RelinkAccountRequest extends FormRequest
         return [
             'username.required' => 'username is required.',
             'password.required' => 'password is required.',
-            'accessToken.required' => 'accessToken is required.',
+
         ];
     }
 
