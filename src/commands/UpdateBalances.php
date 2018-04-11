@@ -38,17 +38,39 @@ class UpdateBalances extends Command
      */
     public function handle()
     {
-        //$accounts = collect(config('plaid.accountModel')::chunk(50));
-        //$oldAverage = $accounts->avg('balance');
-        $tokens = collect(config('plaid.tokenModel')::all()->chunk(10))->unique('token');
+        $tokens = collect(config('plaid.tokenModel')::get()->chunk(100))->unique('token');
         foreach($tokens as $token) {
             $token->each(function ($token) {
                 $accessToken = $token->token;
                 $uuid = $token->uuid;
-                $accounts = Plaid::getConnectData($accessToken);
+                try {
+                    $accounts = Plaid::getConnectData($accessToken);
+                } catch (\Exception $e) {
+                    \Log::info($e);
+                    return;
+                }
+                // Get the accounts that need a relinking
+                if (isset($accounts['message']) && ($accounts['message'] === 'mfa reset' || $accounts['message'] === 'invalid credentials')) {
+                    $bankLock = $this->lookupBank($uuid);
+                    $user = \App\Models\User::uuid($uuid) ?? null;
+                    // Don't throw the re-link if the account is locked, that's a different thing
+                    if($bankLock['isLocked']) {
+                        \Log::info(($user) ? $user->name() . ': Account locked.' : 'Account locked, missing name.');
+                        return;
+                    }
+                    $bankInfo = $this->bankInfo($uuid);
+                    if(!$bankInfo) {
+                        \Log::info(($user) ? $user->name() . ': Account info missing.' : 'Account info missing, missing name.');
+                        return;
+                    }
+                    if(config('plaid.notifyRelink')) {
+                        event(new \App\Events\Plaid\BankCredentialsCorrupted(\App\Models\User::uuid($uuid), $bankInfo->institutionName, $bankInfo->last4));
+                    }
+                }
                 if ( ! isset($accounts['accounts']) ) {
                     return;
                 }
+
                 collect($accounts['accounts'])->each(function ($account) use ($accessToken, $uuid) {
                     $accountId = ( starts_with($accessToken, 'test_') ) ? $uuid . '_' . $account['_id'] : $account['_id'];
                     config('plaid.accountModel')::where('accountId', $accountId)->update([
@@ -59,49 +81,37 @@ class UpdateBalances extends Command
                         $saved = \Investforward\Smartsave\Models\SmartsaveBalance::create([
                             'uuid' => $uuid,
                             'accountId' => $accountId,
-                            'balance' => $account['balance']['available'] ?? $account['balance']['current']
-                            // failover to current balance if available (pending) isn't defined
+                            'balance' => $account['balance']['available'] ?? $account['balance']['current'] // failover to current balance if available (pending) isn't defined
                         ]);
                     }
                 });
             });
         }
-        //$newAverage = collect(config('plaid.accountModel')::all())->avg('balance');
-        //$popular = config('plaid.accountModel')::all()->unique('institutionName')->pluck('institutionName')->map(function($name) {
-        //    return [
-        //        'name' => $name,
-        //        'accounts' => config('plaid.accountModel')::where('institutionName', $name)->count()
-        //    ];
-        //})->sortByDesc('accounts')->shift();
         \Slack::to('@ben')->attach([
             'fallback' => 'Updating Plaid balances',
             'color' => '#36a64f',
             'author_name' => 'Updating Plaid balances',
-            //'fields' => [
-            //    [
-            //        'title' => 'Total number of linked accounts',
-            //        'value' => config('plaid.accountModel')::all()->count(),
-            //        'short' => true
-            //    ],
-            //    [
-            //        'title' => 'Most common bank',
-            //        'value' => $popular['name'].': '.$popular['accounts'].' accounts',
-            //        'short' => true
-            //    ],
-            //    [
-            //        'title' => 'Average account balance (yesterday)',
-            //        'value' => str_dollarsCents($oldAverage),
-            //        'short' => true
-            //    ],
-            //    [
-            //        'title' => 'Average account balance (today)',
-            //        'value' => str_dollarsCents($newAverage),
-            //        'short' => true
-            //    ],
-            //],
             'footer' => 'IF-API',
             'footer_icon' => 'https://platform.slack-edge.com/img/default_application_icon.png',
             'ts' => \Carbon\Carbon::now()->timestamp
         ])->send();
     }
+
+    public function bankInfo($uuid)
+    {
+        return config('plaid.accountModel')::where('uuid', $uuid)->where('smartsave', true)->first();
+    }
+
+    public function lookupBank($uuid)
+    {
+        $customerId = \App\Models\User::uuid($uuid)->coreproId ?? null;
+        if(!$customerId) {
+            return;
+        }
+        return collect(json_decode((new \Corepro)->request('GET', "externalAccount/list/$customerId")->getContent(), true)['data'])
+            ->filter(function($account) {
+                return $account['customField1'] === "external" && $account['isActive'];
+            })->first();
+    }
+
 }
