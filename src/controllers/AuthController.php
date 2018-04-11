@@ -10,6 +10,7 @@ use Travoltron\Plaid\Requests\Auth\MfaAccountRequest;
 use Travoltron\Plaid\Requests\Auth\UpgradeAccountRequest;
 use Travoltron\Plaid\Requests\Auth\UpdateAccountRequest;
 use Travoltron\Plaid\Requests\Auth\RelinkAccountRequest;
+use Travoltron\Plaid\Requests\Auth\RelinkMfaAccountRequest;
 
 class AuthController extends BaseController
 {
@@ -77,12 +78,18 @@ class AuthController extends BaseController
             $relink = Plaid::updateConnectUser($request->input('username'), $request->input('password'), $request->input('pin', null), $plaid_token);
         }
 
+        if($this->needsMfa($relink)) {
+            return $this->needsMfa($relink);
+        }
+
         if($this->hasError($relink)) {
             return $this->hasError($relink);
         }
+
+        return $this->successFormatter($request->header('uuid'));
     }
 
-    public function relinkMfaAccount(MfaAccountRequest $request)
+    public function relinkMfaAccount(RelinkMfaAccountRequest $request)
     {
         $linkedAccount = config('plaid.accountModel')::where('uuid', $request->header('uuid'))->where('smartsave', true)->first();
         $type = $linkedAccount->institutionName ?? null;
