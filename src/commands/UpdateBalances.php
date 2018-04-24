@@ -43,28 +43,39 @@ class UpdateBalances extends Command
             $token->each(function ($token) {
                 $accessToken = $token->token;
                 $uuid = $token->uuid;
-                try {
-                    $accounts = Plaid::getConnectData($accessToken);
-                } catch (\Exception $e) {
-                    \Log::info($e);
+                $user = \App\Models\User::uuid($uuid);
+                // Skip for users that have closed an account
+                if(!$user) {
+                    \Log::info('Skipping for deleted user');
+                    $token->delete();
                     return;
                 }
+                $accounts = Plaid::getConnectData($accessToken);
                 // Get the accounts that need a relinking
                 if (isset($accounts['message']) && ($accounts['message'] === 'mfa reset' || $accounts['message'] === 'invalid credentials')) {
                     $bankLock = $this->lookupBank($uuid);
-                    $user = \App\Models\User::uuid($uuid) ?? null;
                     // Don't throw the re-link if the account is locked, that's a different thing
                     if($bankLock['isLocked']) {
-                        \Log::info(($user) ? $user->name() . ': Account locked.' : 'Account locked, missing name.');
+                        \Log::info($user->name() . ': Account locked.');
                         return;
                     }
                     $bankInfo = $this->bankInfo($uuid);
                     if(!$bankInfo) {
-                        \Log::info(($user) ? $user->name() . ': Account info missing.' : 'Account info missing, missing name.');
+                        \Log::info($user->name() . ': Account info missing.');
                         return;
                     }
+                    // Update the Plaid smartsave account to be on the correct batch
+                    $accounts = config('plaid.accountModel')::where('uuid', $uuid)->where('last4', $bankInfo->last4)->get();
+                    $smartsaver = $accounts->containsStrict(function($value, $key) {
+                        return $value->smartsave === 1;
+                    });
+                    if($smartsaver && $accounts->count() > 1) {
+                        $accounts->sortByDesc('batch')->first()->update(['smartsave' => true]);
+                        $accounts->sortByDesc('batch')->last()->update(['smartsave' => false]);
+                    }
+
                     if(config('plaid.notifyRelink')) {
-                        event(new \App\Events\Plaid\BankCredentialsCorrupted(\App\Models\User::uuid($uuid), $bankInfo->institutionName, $bankInfo->last4));
+                        \Redis::setex('plaidRelink_' . $uuid, 10 * 60, json_encode([\App\Models\User::uuid($uuid), $bankInfo->institutionName, $bankInfo->last4]));
                     }
                 }
                 if ( ! isset($accounts['accounts']) ) {
@@ -78,7 +89,7 @@ class UpdateBalances extends Command
                     ]);
                     if ( isset(config('plaid.accountModel')::where('accountId', $accountId)->where('uuid', $uuid)
                                                            ->first()->smartsave) && class_exists(\Investforward\Smartsave\Models\SmartsaveBalance::class) ) {
-                        $saved = \Investforward\Smartsave\Models\SmartsaveBalance::create([
+                        \Investforward\Smartsave\Models\SmartsaveBalance::create([
                             'uuid' => $uuid,
                             'accountId' => $accountId,
                             'balance' => $account['balance']['available'] ?? $account['balance']['current'] // failover to current balance if available (pending) isn't defined
@@ -87,6 +98,22 @@ class UpdateBalances extends Command
                 });
             });
         }
+
+        $this->sendNotifications();
+
+        $this->slack();
+    }
+
+    protected function sendNotifications()
+    {
+        foreach(\Redis::keys('plaidRelink_*') as $brokenLink) {
+            $info = json_decode(\Redis::get($brokenLink), true);
+            event(new \App\Events\Plaid\BankCredentialsCorrupted(\App\Models\User::uuid($info[0]['uuid']), $info[1], $info[2]));
+        }
+    }
+
+    protected function slack()
+    {
         \Slack::to('@ben')->attach([
             'fallback' => 'Updating Plaid balances',
             'color' => '#36a64f',
