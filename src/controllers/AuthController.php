@@ -86,6 +86,8 @@ class AuthController extends BaseController
             return $this->hasError($relink);
         }
 
+        $this->touchTimestamps($relink);
+
         return $this->successFormatter($request->header('uuid'));
     }
 
@@ -107,7 +109,21 @@ class AuthController extends BaseController
             return $this->hasError($auth);
         }
 
+        $this->touchTimestamps($relink);
+
         return $this->successFormatter($request->header('uuid'));
+    }
+
+    public function touchTimestamps($data)
+    {
+        collect($data['accounts'])->map(function($account) {
+            $last4 = $account['meta']['number'] ?? '0000';
+            config('plaid.accountModel')::where('uuid', request()->header('uuid'))
+                                        ->where('last4', $last4)
+                                        ->where('accountName', $account['meta']['name'])
+                                        ->first()
+                                        ->touch();
+        });
     }
 
     public function updateAccount(UpdateAccountRequest $request)
