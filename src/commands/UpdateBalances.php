@@ -2,6 +2,7 @@
 
 namespace Travoltron\Plaid\Commands;
 
+use Carbon\Carbon;
 use Travoltron\Plaid\Plaid;
 use Illuminate\Console\Command;
 
@@ -12,7 +13,7 @@ class UpdateBalances extends Command
      *
      * @var string
      */
-    protected $signature = 'plaid:balances';
+    protected $signature = 'plaid:balances  {--uuid=}';
 
     /**
      * The console command description.
@@ -38,10 +39,30 @@ class UpdateBalances extends Command
      */
     public function handle()
     {
-        $tokens = collect(config('plaid.tokenModel')::get()->chunk(100))->unique('token');
+        if($this->option('uuid')) {
+            if(!\App\Models\User::uuid($this->option('uuid'))) {
+                return;
+            }
+            $tokens = config('plaid.accountModel')::where('uuid', $this->option('uuid'))->get()->chunk(100);
+        }
+        if(!$this->option('uuid')) {
+            $tokens = config('plaid.accountModel')::where('smartsave', '=', 1)->get()->unique(function ($account) {
+                return $account->last4 . $account->institutionName . $account->type;
+            });
+        }
         foreach($tokens as $token) {
             $token->each(function ($token) {
-                $accessToken = $token->token;
+                // Since this lookup updates everything, we'll skip subsequent requests
+                if($token->updated_at->isSameDay(Carbon::now())) {
+                    \Log::info('This account has already been updated.');
+                    return;
+                }
+                try {
+                    $accessToken = $token->token;
+                } catch (\Exception $e) {
+                    \Log::info('Payload decryption error.');
+                    return;
+                }
                 $uuid = $token->uuid;
                 $user = \App\Models\User::uuid($uuid);
                 // Skip for users that have closed an account
@@ -50,28 +71,44 @@ class UpdateBalances extends Command
                     $token->delete();
                     return;
                 }
+
                 $accounts = Plaid::getConnectData($accessToken);
+                $bankInfo = $this->bankInfo($uuid);
+                $bankLock = $this->lookupBank($uuid);
+
                 // Get the accounts that need a relinking
                 if (isset($accounts['message']) && ($accounts['message'] === 'mfa reset' || $accounts['message'] === 'invalid credentials')) {
-                    $bankLock = $this->lookupBank($uuid);
+
                     // Don't throw the re-link if the account is locked, that's a different thing
                     if($bankLock['isLocked']) {
                         \Log::info($user->name() . ': Account locked.');
                         return;
                     }
-                    $bankInfo = $this->bankInfo($uuid);
+
                     if(!$bankInfo) {
                         \Log::info($user->name() . ': Account info missing.');
                         return;
                     }
                     // Update the Plaid smartsave account to be on the correct batch
-                    $accounts = config('plaid.accountModel')::where('uuid', $uuid)->where('last4', $bankInfo->last4)->get();
-                    $smartsaver = $accounts->containsStrict(function($value, $key) {
+                    $linkedAccounts = config('plaid.accountModel')::where('uuid', $uuid)->where('last4', $bankInfo->last4)->get();
+                    $smartsaver = $linkedAccounts->containsStrict(function($value, $key) {
                         return $value->smartsave === 1;
                     });
-                    if($smartsaver && $accounts->count() > 1) {
-                        $accounts->sortByDesc('batch')->first()->update(['smartsave' => true]);
-                        $accounts->sortByDesc('batch')->last()->update(['smartsave' => false]);
+                    if(!$smartsaver) {
+                        \Log::info($user->name() . ' never selected an account to use.');
+                        return;
+                    }
+                    if($smartsaver && $linkedAccounts->count() > 1) {
+                        // Update the first linked to be false
+                        $first = $linkedAccounts->sortByDesc('batch')->first();
+                        $first->timestamps = false;
+                        $first->smartsave = true;
+                        $first->save();
+                        // Update the last linked to be true
+                        $last = $linkedAccounts->sortByDesc('batch')->last();
+                        $last->timestamps = false;
+                        $last->smartsave = false;
+                        $last->save();
                     }
 
                     if(config('plaid.notifyRelink')) {
@@ -79,6 +116,7 @@ class UpdateBalances extends Command
                     }
                 }
                 if ( ! isset($accounts['accounts']) ) {
+                    \Log::info($user->name() . ': Plaid did not update.');
                     return;
                 }
 
@@ -126,7 +164,7 @@ class UpdateBalances extends Command
 
     public function bankInfo($uuid)
     {
-        return config('plaid.accountModel')::where('uuid', $uuid)->where('smartsave', true)->first();
+        return config('plaid.accountModel')::where('uuid', $uuid)->where('smartsave', true)->orderByDesc('batch')->first();
     }
 
     public function lookupBank($uuid)

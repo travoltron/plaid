@@ -86,7 +86,7 @@ class AuthController extends BaseController
             return $this->hasError($relink);
         }
 
-        $this->touchTimestamps($relink);
+        $this->updateBalances($request->header('uuid'));
 
         return $this->successFormatter($request->header('uuid'));
     }
@@ -109,26 +109,21 @@ class AuthController extends BaseController
             return $this->hasError($auth);
         }
 
-        $this->touchTimestamps($relink);
+        $this->updateBalances($request->header('uuid'));
 
         return $this->successFormatter($request->header('uuid'));
     }
 
-    public function touchTimestamps($data)
+    protected function updateBalances($uuid)
     {
-        collect($data['accounts'])->map(function($account) {
-            $last4 = $account['meta']['number'] ?? '0000';
-            config('plaid.accountModel')::where('uuid', request()->header('uuid'))
-                                        ->where('last4', $last4)
-                                        ->where('accountName', $account['meta']['name'])
-                                        ->first()
-                                        ->touch();
-        });
+        \Artisan::call('plaid:balances', [
+              '--uuid' => $uuid
+        ]);
     }
 
     public function updateAccount(UpdateAccountRequest $request)
     {
-        $acct = config('plaid.accountModel')::where('accountId', $request->input('accountId'))->first();
+        $acct = config('plaid.accountModel')::where('accountId', $request->input('accountId'))->orderByDesc('batch')->first();
         if($acct->accountNumber !== null || $acct->routingNumber !== null) {
             return response()->api(['message' => 'Account and routing numbers already set.'], 400);
         }
