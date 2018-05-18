@@ -81,12 +81,12 @@ class UpdateBalances extends Command
 
                     // Don't throw the re-link if the account is locked, that's a different thing
                     if($bankLock['isLocked']) {
-                        \Log::info($user->name() . ': Account locked.');
+                        \Log::info($user->name() . ': Account locked at Corepro.');
                         return;
                     }
 
                     if(!$bankInfo) {
-                        \Log::info($user->name() . ': Account info missing.');
+                        \Log::info($user->name() . ': Account info missing, likely never finished MFA or unsupported at Plaid.');
                         return;
                     }
                     // Update the Plaid smartsave account to be on the correct batch
@@ -146,6 +146,7 @@ class UpdateBalances extends Command
     {
         foreach(\Redis::keys('plaidRelink_*') as $brokenLink) {
             $info = json_decode(\Redis::get($brokenLink), true);
+            \Log::info('Notifying ' . \App\Models\User::uuid($info[0]['uuid'])->name() . ' of broken Plaid link.');
             event(new \App\Events\Plaid\BankCredentialsCorrupted(\App\Models\User::uuid($info[0]['uuid']), $info[1], $info[2]));
         }
     }
