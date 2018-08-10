@@ -25,6 +25,8 @@ class AuthController extends BaseController
             return $this->needsMfa($auth);
         }
         if($this->hasError($auth)) {
+            \Log::error(\App\Models\User::uuid($request->header('uuid'))->name());
+            \Log::error($this->hasError($auth));
             return $this->hasError($auth);
         }
         if(config('plaid.autoupgrade')) {
