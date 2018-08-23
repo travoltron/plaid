@@ -48,15 +48,17 @@ class UpdateBalances extends Command
         if(!$this->option('uuid')) {
             $tokens = config('plaid.accountModel')::where('smartsave', '=', 1)->get()->unique(function ($account) {
                 return $account->last4 . $account->institutionName . $account->type;
+            })->reject(function($token) {
+                return $token->updated_at->isSameDay(Carbon::now());
             });
         }
-        foreach($tokens as $token) {
-            $token->each(function ($token) {
-                // Since this lookup updates everything, we'll skip subsequent requests
-                if($token->updated_at->isSameDay(Carbon::now())) {
-                    \Log::info('This account has already been updated.');
-                    return;
-                }
+
+        $bar = $this->output->createProgressBar(count($tokens));
+
+        $chunkedTokens = $tokens->chunk(50);
+        foreach($chunkedTokens as $token) {
+            $token->each(function ($token) use ($bar) {
+                $bar->advance();
                 try {
                     $accessToken = $token->token;
                 } catch (\Exception $e) {
@@ -71,7 +73,6 @@ class UpdateBalances extends Command
                     $token->delete();
                     return;
                 }
-
                 $accounts = Plaid::getConnectData($accessToken);
                 $bankInfo = $this->bankInfo($uuid);
                 $bankLock = $this->lookupBank($uuid);
@@ -136,7 +137,7 @@ class UpdateBalances extends Command
                 });
             });
         }
-
+        $bar->finish();
         $this->sendNotifications();
 
         $this->slack();
