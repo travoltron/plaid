@@ -118,12 +118,17 @@ class AuthController extends BaseController
     protected function updateBalances($uuid)
     {
         \Artisan::call('plaid:balances', [
-              '--uuid' => $uuid
+            '--uuid' => $uuid
         ]);
     }
 
     public function updateAccount(UpdateAccountRequest $request)
     {
+        config('plaid.accountModel')::where('uuid', $request->header('uuid'))->get()->map(function ($acct) {
+            $acct->smartsave = false;
+            $acct->save();
+        });
+
         $acct = config('plaid.accountModel')::where('accountId', $request->input('accountId'))->orderByDesc('batch')->first();
         if($acct->accountNumber !== null || $acct->routingNumber !== null) {
             return response()->api(['message' => 'Account and routing numbers already set.'], 400);
