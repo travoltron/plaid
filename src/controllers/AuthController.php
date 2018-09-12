@@ -124,20 +124,14 @@ class AuthController extends BaseController
 
     public function updateAccount(UpdateAccountRequest $request)
     {
-        config('plaid.accountModel')::where('uuid', $request->header('uuid'))->get()->map(function ($acct) {
-            $acct->smartsave = false;
-            $acct->save();
-        });
-
         $acct = config('plaid.accountModel')::where('accountId', $request->input('accountId'))->orderByDesc('batch')->first();
         if($acct->accountNumber !== null || $acct->routingNumber !== null) {
             return response()->api(['message' => 'Account and routing numbers already set.'], 400);
         }
         $acct->accountNumber = $request->input('accountNumber');
         $acct->routingNumber = $request->input('routingNumber');
-        // Since intent is being taken, we'll enable SmartSave here
-        $acct->smartsave = true;
         $acct->save();
+
         return $this->successFormatter($request->header('uuid'));
     }
 
