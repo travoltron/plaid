@@ -1023,5 +1023,27 @@ class Plaid
         } catch (RequestException $e) {
             return json_decode($e->getResponse()->getBody()->getContents(), true);
         }
+	}
+
+    /**
+     * Retrieve Item Request
+     * @method getItem
+     * @param  string      $plaid_token User plaid access token
+     * @return array       Information about a plaid token
+     */
+    public static function getItem($plaid_token)
+    {
+        try {
+            $request = self::client()->post('item/get', [
+                'json' => [
+                    'client_id' => config('plaid.client_id'),
+                    'secret' => config('plaid.secret'),
+                    'access_token' => $plaid_token
+                ]
+            ]);
+            return json_decode($request->getBody(), true)['accounts'];
+        } catch (RequestException $e) {
+            return json_decode($e->getResponse()->getBody()->getContents(), true);
+        }
     }
 }
