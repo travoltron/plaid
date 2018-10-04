@@ -128,6 +128,9 @@ class AuthController extends BaseController
         if($acct->accountNumber !== null || $acct->routingNumber !== null) {
             return response()->api(['message' => 'Account and routing numbers already set.'], 400);
         }
+        if(!ends_with($request->input('accountNumber'), $acct->last4)) {
+            return response()->api(['message' => 'Account number mismatch detected.'], 400);
+        }
         $acct->accountNumber = $request->input('accountNumber');
         $acct->routingNumber = $request->input('routingNumber');
         $acct->save();
